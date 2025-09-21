@@ -32,14 +32,13 @@ jobs:
       - name: Semgrep
         uses: semgrep/semgrep-action@v1
         with:
-          config: >-
+          config: |
             p/owasp-top-ten
             p/nodejsscan
             p/docker
-          # Emit SARIF and fail on blocking rules
-          args: --sarif --output=semgrep.sarif --error
-          # Optional publishing to semgrep.dev (safe if unset)
-          publishToken: ${{ secrets.SEMGREP_APP_TOKEN }}
+          sarif_output: semgrep.sarif
+          error_on_findings: true
+          publishToken: ${{ secrets.SEMGREP_APP_TOKEN }} # optional
 
       - name: Upload Semgrep SARIF
         uses: github/codeql-action/upload-sarif@v3
