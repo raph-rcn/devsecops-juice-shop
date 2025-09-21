@@ -42,8 +42,7 @@ jobs:
             p/owasp-top-ten
             p/nodejsscan
             p/docker
-          # write SARIF next to the repo root
-          args: --sarif --output=semgrep.sarif
+          sarif_report: semgrep.sarif
 
       - name: Upload Semgrep SARIF
         uses: github/codeql-action/upload-sarif@v3
