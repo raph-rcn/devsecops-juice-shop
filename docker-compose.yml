@@ -1,0 +1,5 @@
+services:
+  juice:
+    image: ghcr.io/juice-shop/juice-shop
+    ports:
+      - "3000:3000"

@@ -1,0 +1,2 @@
+10010	IGNORE	.*	# Cookie without HttpOnly (example tuning)
+10054	WARN	.*	# CSP not set

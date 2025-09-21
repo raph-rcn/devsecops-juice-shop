@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: juice-shop
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: juice-shop}
+  template:
+    metadata:
+      labels: {app: juice-shop}
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: app
+          image: ghcr.io/juice-shop/juice-shop:latest
+          ports: [{containerPort: 3000}]
+          resources:
+            requests: {cpu: "100m", memory: "128Mi"}
+            limits:   {cpu: "500m", memory: "512Mi"}
+          readinessProbe:
+            httpGet: {path: "/", port: 3000}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: {path: "/", port: 3000}
+            initialDelaySeconds: 30
+            periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: juice-shop
+spec:
+  type: NodePort
+  selector: {app: juice-shop}
+  ports:
+    - port: 3000
+      targetPort: 3000
+      nodePort: 30080
