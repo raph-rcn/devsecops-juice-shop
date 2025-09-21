@@ -42,10 +42,12 @@ jobs:
           directory: .
           framework: terraform,kubernetes
       - name: Conftest (OPA)
-        uses: instrumenta/conftest-action@v0
+        uses: YubicoLabs/action-conftest@v3
         with:
-          files: deployment/k8s
-          policy: policy/k8s
+          files: deployment/k8s             # files/dirs to test (space-separated)
+          policy: policy/k8s                # your Rego policies directory
+          gh-token: ${{ secrets.GITHUB_TOKEN }}
+          gh-comment-url: ${{ github.event.pull_request.comments_url }}
         continue-on-error: true
   build_and_scan:
     runs-on: ubuntu-latest
