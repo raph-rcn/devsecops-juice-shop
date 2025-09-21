@@ -1,7 +1,6 @@
 # DevSecOps Juice Shop
-Wrapper repo to practice DevSecOps: CI scans (Gitleaks, Semgrep, Checkov, Hadolint),
-SBOM (Syft), container scans (Trivy), DAST (ZAP), and image signing (Cosign).
 
+This repo wraps the vulnerable OWASP Juice Shop to practice setting up an end-to-end DevSecOps lab.
 
 ## GitHub Actions
 
