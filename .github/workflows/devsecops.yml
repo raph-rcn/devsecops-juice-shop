@@ -28,16 +28,24 @@ jobs:
         with:
           args: detect --redact --no-git -v
 
-      # Semgrep SAST (JS, Node, Docker, K8s)
-      - name: Set up Semgrep
-        uses: semgrep/semgrep-action@v1
-        with:
-          config: >-
-            p/owasp-top-ten
-            p/nodejsscan
-            p/docker
-          generateSarif: true
-          publishToken: ${{ secrets.SEMGREP_APP_TOKEN }} # optional
+      # Semgrep SAST (JS, Node, Docker, K8s) → SARIF
+      - name: Setup Semgrep
+        uses: semgrep/setup-semgrep@v1
+
+      # Optional: publish to semgrep.dev (remove if unused)
+      - name: Configure Semgrep token
+        if: ${{ secrets.SEMGREP_APP_TOKEN != '' }}
+        run: echo "SEMGREP_APP_TOKEN=${{ secrets.SEMGREP_APP_TOKEN }}" >> $GITHUB_ENV
+
+      - name: Run Semgrep
+        run: |
+          semgrep ci \
+            --config p/owasp-top-ten \
+            --config p/nodejsscan \
+            --config p/docker \
+            --sarif -o semgrep.sarif \
+            --error
+
       - name: Upload Semgrep SARIF
         uses: github/codeql-action/upload-sarif@v3
         with:
@@ -111,7 +119,12 @@ jobs:
           output: trivy-image.sarif
           severity: CRITICAL,HIGH
 
-      - name: Upload Trivy SARIF
+      - name: Upload Trivy FS SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-fs.sarif
+
+      - name: Upload Trivy Image SARIF
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trivy-image.sarif
@@ -151,7 +164,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Give the app a moment to boot
       - name: Wait for app
         run: |
           for i in {1..60}; do
@@ -165,8 +177,9 @@ jobs:
         with:
           target: "http://localhost:3000"
           rules_file_name: .zap/rules.tsv
-          cmd_options: "-a"   # include alpha passive rules
+          cmd_options: "-a"
           fail_action: true
+
       - name: Upload ZAP report
         uses: actions/upload-artifact@v4
         with:
