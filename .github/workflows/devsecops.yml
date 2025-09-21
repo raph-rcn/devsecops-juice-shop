@@ -26,7 +26,14 @@ jobs:
       - name: Gitleaks
         uses: gitleaks/gitleaks-action@v2
         with:
-          args: detect --redact --no-git -v
+          args: detect --redact -v \
+            --report-format sarif --report-path gitleaks.sarif
+
+      - name: Upload Gitleaks SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()  # upload even if Gitleaks fails the job
+        with:
+          sarif_file: gitleaks.sarif
 
       # Semgrep SAST (JS, Node, Docker, K8s) → SARIF
       - name: Semgrep
