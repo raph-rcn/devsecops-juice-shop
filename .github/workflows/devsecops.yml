@@ -32,12 +32,9 @@ jobs:
       - name: Setup Semgrep
         uses: semgrep/setup-semgrep@v1
 
-      # Optional: publish to semgrep.dev (remove if unused)
-      - name: Configure Semgrep token
-        if: ${{ secrets.SEMGREP_APP_TOKEN != '' }}
-        run: echo "SEMGREP_APP_TOKEN=${{ secrets.SEMGREP_APP_TOKEN }}" >> $GITHUB_ENV
-
       - name: Run Semgrep
+        env:
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }} # safe if unset
         run: |
           semgrep ci \
             --config p/owasp-top-ten \
@@ -66,7 +63,7 @@ jobs:
 
   # 2) Build + SBOM + image scan
   build_and_scan:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-lest
     needs: static
     steps:
       - uses: actions/checkout@v4
