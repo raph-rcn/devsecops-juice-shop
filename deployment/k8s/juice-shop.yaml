@@ -17,6 +17,8 @@ spec:
         - name: app
           image: ghcr.io/juice-shop/juice-shop:latest
           ports: [{containerPort: 3000}]
+          securityContext:
+            allowPrivilegeEscalation: false
           resources:
             requests: {cpu: "100m", memory: "128Mi"}
             limits:   {cpu: "500m", memory: "512Mi"}
