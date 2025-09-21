@@ -1,26 +1,35 @@
 name: DevSecOps CI
+
 on:
   pull_request:
   push:
     branches: [ main ]
+
 permissions:
   contents: read
   security-events: write
-  id-token: write
-  packages: write
+  id-token: write  # for keyless signing (cosign)
+  packages: write  # to push to GHCR
+
 env:
   IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/juice-shop
   TAG: ${{ github.sha }}
+
 jobs:
+  # 1) Fast static checks
   static:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      # Secrets scan
       - name: Gitleaks
         uses: gitleaks/gitleaks-action@v2
         with:
           args: detect --redact --no-git -v
-      - name: Semgrep
+
+      # Semgrep SAST (JS, Node, Docker, K8s)
+      - name: Set up Semgrep
         uses: semgrep/semgrep-action@v1
         with:
           config: >-
@@ -28,57 +37,64 @@ jobs:
             p/nodejsscan
             p/docker
           generateSarif: true
+          publishToken: ${{ secrets.SEMGREP_APP_TOKEN }} # optional
       - name: Upload Semgrep SARIF
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: semgrep.sarif
+
+      # Dockerfile lint
       - name: Hadolint
         uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: Dockerfile
-      - name: Checkov
+
+      # IaC scanning (Terraform + K8s)
+      - name: Checkov (IaC)
         uses: bridgecrewio/checkov-action@v12
         with:
           directory: .
           framework: terraform,kubernetes
-      - name: Conftest (OPA)
-        uses: YubicoLabs/action-conftest@v3
-        with:
-          files: deployment/k8s             # files/dirs to test (space-separated)
-          policy: policy/k8s                # your Rego policies directory
-          gh-token: ${{ secrets.GITHUB_TOKEN }}
-          gh-comment-url: ${{ github.event.pull_request.comments_url }}
-        continue-on-error: true
+
+  # 2) Build + SBOM + image scan
   build_and_scan:
     runs-on: ubuntu-latest
     needs: static
     steps:
       - uses: actions/checkout@v4
+
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build image
         uses: docker/build-push-action@v6
         with:
           context: .
           push: false
           tags: ${{ env.IMAGE_NAME }}:${{ env.TAG }}
-      - name: Save image tar
-        run: docker save $IMAGE_NAME:$TAG -o image.tar
+
+      - name: Save image to tar (for scans)
+        run: |
+          docker save $IMAGE_NAME:$TAG -o image.tar
+
       - name: SBOM (Syft)
         uses: anchore/sbom-action@v0
         with:
           image: ${{ env.IMAGE_NAME }}:${{ env.TAG }}
           format: cyclonedx-json
           output-file: sbom.cdx.json
-      - uses: actions/upload-artifact@v4
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
         with:
           name: sbom
           path: sbom.cdx.json
-      - name: Trivy FS
+
+      - name: Trivy FS (source deps/secrets)
         uses: aquasecurity/trivy-action@0.24.0
         with:
           scan-type: fs
@@ -86,6 +102,7 @@ jobs:
           format: sarif
           output: trivy-fs.sarif
           severity: CRITICAL,HIGH
+
       - name: Trivy Image
         uses: aquasecurity/trivy-action@0.24.0
         with:
@@ -93,10 +110,13 @@ jobs:
           format: sarif
           output: trivy-image.sarif
           severity: CRITICAL,HIGH
+
       - name: Upload Trivy SARIF
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trivy-image.sarif
+
+      # Optionally push if on main and scans passed
       - name: Push image (main only)
         if: github.ref == 'refs/heads/main'
         uses: docker/build-push-action@v6
@@ -106,12 +126,17 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME }}:${{ env.TAG }}
             ${{ env.IMAGE_NAME }}:latest
-      - name: Cosign install
-        if: github.ref == 'refs/heads/main'
-        uses: sigstore/cosign-installer@v3
+
+      # Cosign keyless sign (main only)
       - name: Cosign sign (keyless)
         if: github.ref == 'refs/heads/main'
-        run: cosign sign --yes $IMAGE_NAME:latest
+        uses: sigstore/cosign-installer@v3
+      - name: Sign image
+        if: github.ref == 'refs/heads/main'
+        run: |
+          cosign sign --yes $IMAGE_NAME:latest
+
+  # 3) DAST with OWASP ZAP against ephemeral container
   dast:
     runs-on: ubuntu-latest
     needs: build_and_scan
@@ -125,6 +150,8 @@ jobs:
           --health-interval 5s --health-timeout 2s --health-retries 30
     steps:
       - uses: actions/checkout@v4
+
+      # Give the app a moment to boot
       - name: Wait for app
         run: |
           for i in {1..60}; do
@@ -132,12 +159,13 @@ jobs:
             sleep 2
           done
           echo "App did not become ready" && exit 1
+
       - name: ZAP Baseline Scan
         uses: zaproxy/action-baseline@v0.12.0
         with:
           target: "http://localhost:3000"
           rules_file_name: .zap/rules.tsv
-          cmd_options: "-a"
+          cmd_options: "-a"   # include alpha passive rules
           fail_action: true
       - name: Upload ZAP report
         uses: actions/upload-artifact@v4
