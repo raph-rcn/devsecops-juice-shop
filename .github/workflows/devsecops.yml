@@ -63,7 +63,15 @@ jobs:
         uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: Dockerfile
-          failure-threshold: warning
+          failure-threshold: error        # only “error” level fails the job
+          format: sarif
+          output-file: hadolint.sarif
+
+      - name: Upload Hadolint SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: hadolint.sarif
 
       - name: Checkov (IaC)
         uses: bridgecrewio/checkov-action@v12
