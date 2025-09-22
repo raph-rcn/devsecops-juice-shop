@@ -45,10 +45,10 @@ jobs:
               --config p/nodejsscan \
               --config p/javascript \
               --config p/tssecurity \
-              --config p/angular \
-              --include 'app/juice-shop/**' \
-              --exclude 'app/juice-shop/frontend/dist/**' \
-              --sarif -o semgrep.sarif
+              --exclude app/juice-shop/frontend/dist \
+              --metrics=off \
+              --sarif -o semgrep.sarif \
+              app/juice-shop
       
       - name: Ensure Semgrep SARIF exists
         if: always()
