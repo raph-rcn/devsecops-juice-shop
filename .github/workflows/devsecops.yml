@@ -37,18 +37,21 @@ jobs:
         run: |
           git clone --depth=1 https://github.com/juice-shop/juice-shop.git app/juice-shop
       
-      - name: Semgrep (scan Juice Shop)
+      - name: Semgrep (scan Juice Shop code)
         run: |
-          docker run --rm -v "$PWD:/src" --workdir /src returntocorp/semgrep:1.76.0 \
+          docker run --rm \
+            -v "$PWD:/src" \
+            --workdir /src \
+            returntocorp/semgrep:1.76.0 \
             semgrep scan \
               --config p/owasp-top-ten \
               --config p/nodejsscan \
               --config p/javascript \
               --config p/tssecurity \
-              --exclude app/juice-shop/frontend/dist \
-              --metrics=off \
-              --sarif -o semgrep.sarif \
-              app/juice-shop
+              --config p/angular \
+              --include 'app/juice-shop/**' \
+              --exclude 'app/juice-shop/frontend/dist/**' \
+              --sarif -o semgrep.sarif
       
       - name: Ensure Semgrep SARIF exists
         if: always()
