@@ -33,26 +33,28 @@ jobs:
         with:
           sarif_file: results.sarif
 
-      # Semgrep SAST (deterministic via Docker) → SARIF
-      - name: Semgrep (docker)
+      - name: Fetch Juice Shop source
         run: |
-          docker run --rm \
-            -v "$PWD:/src" \
-            --workdir /src \
-            returntocorp/semgrep:1.76.0 \
-            semgrep ci \
+          git clone --depth=1 https://github.com/juice-shop/juice-shop.git app/juice-shop
+      
+      - name: Semgrep (docker, scan JS/TS) # Semgrep: scan that source
+        run: |
+          docker run --rm -v "$PWD:/src" --workdir /src returntocorp/semgrep:1.76.0 \
+            semgrep scan \
               --config p/owasp-top-ten \
               --config p/nodejsscan \
-              --config p/docker \
+              --config p/javascript \
+              --config p/tssecurity \
+              --config p/angular \
+              --no-git \
+              --include 'app/juice-shop/**' \
+              --exclude 'app/juice-shop/frontend/dist/**' \
               --sarif -o semgrep.sarif
-
-      # Guard: don’t let the upload fail if Semgrep didn’t produce a file
+      
       - name: Ensure Semgrep SARIF exists
         if: always()
-        run: |
-          test -f semgrep.sarif || echo '{"version":"2.1.0","runs":[]}' > semgrep.sarif
-          ls -l semgrep.sarif
-
+        run: test -f semgrep.sarif || echo '{"version":"2.1.0","runs":[]}' > semgrep.sarif
+      
       - name: Upload Semgrep SARIF
         if: always()
         uses: github/codeql-action/upload-sarif@v3
