@@ -48,7 +48,7 @@ jobs:
               --config p/javascript \
               --config p/tssecurity \
               --config p/angular \
-              --no-git \
+              --no-git-ignore \
               --include 'app/juice-shop/**' \
               --exclude 'app/juice-shop/frontend/dist/**' \
               --sarif -o semgrep.sarif
