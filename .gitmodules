@@ -1,0 +1,3 @@
+[submodule "app/juice-shop"]
+	path = app/juice-shop
+	url = https://github.com/juice-shop/juice-shop.git
