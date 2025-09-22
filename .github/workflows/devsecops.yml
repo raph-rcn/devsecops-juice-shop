@@ -37,7 +37,7 @@ jobs:
         run: |
           git clone --depth=1 https://github.com/juice-shop/juice-shop.git app/juice-shop
       
-      - name: Semgrep (docker, scan JS/TS) # Semgrep: scan that source
+      - name: Semgrep (scan Juice Shop)
         run: |
           docker run --rm -v "$PWD:/src" --workdir /src returntocorp/semgrep:1.76.0 \
             semgrep scan \
@@ -46,7 +46,6 @@ jobs:
               --config p/javascript \
               --config p/tssecurity \
               --config p/angular \
-              --no-git \
               --include 'app/juice-shop/**' \
               --exclude 'app/juice-shop/frontend/dist/**' \
               --sarif -o semgrep.sarif
