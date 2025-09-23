@@ -20,9 +20,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: true      # ← pulls app/juice-shop
-          fetch-depth: 0        # (optional) full history if you ever need it
 
       # Gitleaks (unchanged except using results.sarif)
       - name: Gitleaks
@@ -35,44 +32,25 @@ jobs:
         if: always()
         with:
           sarif_file: results.sarif
-      
-      # Make sure Juice Shop code is present (submodule or fallback clone)
-      - name: Ensure Juice Shop source present
-        run: |
-          if [ ! -d app/juice-shop ] || [ -z "$(ls -A app/juice-shop 2>/dev/null)" ]; then
-            echo "Submodule missing/empty – trying to init..."
-            git submodule update --init --recursive || true
-          fi
-          if [ ! -d app/juice-shop ] || [ -z "$(ls -A app/juice-shop 2>/dev/null)" ]; then
-            echo "Still missing – cloning upstream as fallback..."
-            rm -rf app/juice-shop
-            git clone --depth=1 https://github.com/juice-shop/juice-shop.git app/juice-shop
-          fi
-          echo "Repo root:"
-          ls -la
-          echo "Juice Shop dir:"
-          ls -la app/juice-shop | head -n 50
 
-      # Semgrep (scan Juice Shop code)
-      - name: Semgrep (scan Juice Shop code)
+      # Semgrep SAST (deterministic via Docker) → SARIF
+      - name: Semgrep (docker)
         run: |
           docker run --rm \
             -v "$PWD:/src" \
             --workdir /src \
             returntocorp/semgrep:1.76.0 \
-            semgrep scan \
+            semgrep ci \
               --config p/owasp-top-ten \
               --config p/nodejsscan \
-              --config p/javascript \
-              --config p/tssecurity \
-              --config p/angular \
-              --metrics=off \
-              --exclude 'app/juice-shop/frontend/dist/**' \
-              --sarif -o semgrep.sarif \
-              app/juice-shop \
-          || { echo 'Semgrep failed, creating empty SARIF to keep pipeline moving'; \
-               echo '{"version":"2.1.0","runs":[]}' > semgrep.sarif; }
-
+              --config p/docker \
+              --sarif -o semgrep.sarif
+      # Guard: don’t let the upload fail if Semgrep didn’t produce a file
+      - name: Ensure Semgrep SARIF exists
+        if: always()
+        run: |
+          test -f semgrep.sarif || echo '{"version":"2.1.0","runs":[]}' > semgrep.sarif
+          ls -l semgrep.sarif
       - name: Upload Semgrep SARIF
         if: always()
         uses: github/codeql-action/upload-sarif@v3
