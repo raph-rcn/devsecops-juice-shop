@@ -8,6 +8,8 @@ kind: Deployment
 metadata:
   name: juice-shop
   namespace: juice-shop
+  annotations:
+    checkov.io/skip1: CKV_K8S_43=Digest is injected at build time by CI
 spec:
   replicas: 1
   selector:
