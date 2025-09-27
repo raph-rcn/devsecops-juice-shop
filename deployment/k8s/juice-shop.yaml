@@ -1,44 +1,115 @@
+# Namespace (fix CKV_K8S_21)
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: juice-shop
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: juice-shop
+  namespace: juice-shop
 spec:
   replicas: 1
   selector:
-    matchLabels: {app: juice-shop}
+    matchLabels:
+      app: juice-shop
   template:
     metadata:
-      labels: {app: juice-shop}
+      labels:
+        app: juice-shop
     spec:
+      # Fix CKV_K8S_38
+      automountServiceAccountToken: false
+      # Pod-level security context (fix CKV_K8S_31, CKV_K8S_40)
       securityContext:
         runAsNonRoot: true
-        runAsUser: 1000
+        runAsUser: 10100            # >10000 to satisfy "high UID"
+        runAsGroup: 10100
+        fsGroup: 10100
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: app
-          image: ghcr.io/juice-shop/juice-shop:latest
-          ports: [{containerPort: 3000}]
+          # Fix CKV_K8S_14 & CKV_K8S_43 (no :latest; use digest)
+          image: ghcr.io/juice-shop/juice-shop@sha256:SHA256_GOES_HERE
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          # Container security (fix CKV_K8S_28, CKV_K8S_37, CKV_K8S_22)
           securityContext:
             allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            readOnlyRootFilesystem: true
           resources:
-            requests: {cpu: "100m", memory: "128Mi"}
-            limits:   {cpu: "500m", memory: "512Mi"}
+            requests: { cpu: "100m", memory: "128Mi" }
+            limits:   { cpu: "500m", memory: "512Mi" }
           readinessProbe:
-            httpGet: {path: "/", port: 3000}
+            httpGet: { path: "/", port: 3000 }
             initialDelaySeconds: 10
             periodSeconds: 10
           livenessProbe:
-            httpGet: {path: "/", port: 3000}
+            httpGet: { path: "/", port: 3000 }
             initialDelaySeconds: 30
             periodSeconds: 20
+          # Writable paths when root FS is read-only
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: data
+          emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: juice-shop
+  namespace: juice-shop
 spec:
   type: NodePort
-  selector: {app: juice-shop}
+  selector:
+    app: juice-shop
   ports:
     - port: 3000
       targetPort: 3000
       nodePort: 30080
+---
+# NetworkPolicy (fix CKV2_K8S_6)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: juice-shop-default-deny
+  namespace: juice-shop
+spec:
+  podSelector:
+    matchLabels:
+      app: juice-shop
+  policyTypes:
+    - Ingress
+    - Egress
+  # Ingress: allow from same namespace only on 3000
+  ingress:
+    - from:
+        - podSelector: {}          # same-namespace pods
+      ports:
+        - protocol: TCP
+          port: 3000
+  # Egress: allow DNS + all TCP (relaxed; tighten later if you want)
+  egress:
+    - to:
+        - namespaceSelector: {}    # anywhere
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 0-65535
