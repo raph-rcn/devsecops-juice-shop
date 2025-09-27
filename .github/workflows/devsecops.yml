@@ -77,74 +77,107 @@ jobs:
           directory: .
           framework: terraform,kubernetes
 
-  build_and_scan:
-    runs-on: ubuntu-latest
-    needs: static
-    steps:
-      - uses: actions/checkout@v4
-      - name: Login to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: false
-          tags: ${{ env.IMAGE_NAME }}:${{ env.TAG }}
-      - name: Save image to tar (for scans)
-        run: docker save $IMAGE_NAME:$TAG -o image.tar
-      - name: SBOM (Syft)
-        uses: anchore/sbom-action@v0
-        with:
-          image: ${{ env.IMAGE_NAME }}:${{ env.TAG }}
-          format: cyclonedx-json
-          output-file: sbom.cdx.json
-      - name: Upload SBOM
-        uses: actions/upload-artifact@v4
-        with:
-          name: sbom
-          path: sbom.cdx.json
-      - name: Trivy FS (source deps/secrets)
-        uses: aquasecurity/trivy-action@0.24.0
-        with:
-          scan-type: fs
-          scan-ref: .
-          format: sarif
-          output: trivy-fs.sarif
-          severity: CRITICAL,HIGH
-      - name: Trivy Image
-        uses: aquasecurity/trivy-action@0.24.0
-        with:
-          image-ref: ${{ env.IMAGE_NAME }}:${{ env.TAG }}
-          format: sarif
-          output: trivy-image.sarif
-          severity: CRITICAL,HIGH
-      - name: Upload Trivy FS SARIF
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: trivy-fs.sarif
-      - name: Upload Trivy Image SARIF
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: trivy-image.sarif
-      - name: Push image (main only)
-        if: github.ref == 'refs/heads/main'
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: true
-          tags: |
-            ${{ env.IMAGE_NAME }}:${{ env.TAG }}
-            ${{ env.IMAGE_NAME }}:latest
-      - name: Cosign sign (keyless)
-        if: github.ref == 'refs/heads/main'
-        uses: sigstore/cosign-installer@v3
-      - name: Sign image
-        if: github.ref == 'refs/heads/main'
-        run: cosign sign --yes $IMAGE_NAME:latest
+build_and_scan:
+  runs-on: ubuntu-latest
+  needs: static
+  steps:
+    - uses: actions/checkout@v4
+
+    - name: Login to GHCR
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    # Build+push only on main so we get a digest (buildx only exposes digest when pushing)
+    - name: Build & push image (main only)
+      id: build
+      if: github.ref == 'refs/heads/main'
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        push: true
+        tags: |
+          ${{ env.IMAGE_NAME }}:${{ env.TAG }}
+          ${{ env.IMAGE_NAME }}:latest
+
+    # For PRs (non-main), just build locally (no digest available)
+    - name: Build image (PRs)
+      if: github.ref != 'refs/heads/main'
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        push: false
+        tags: ${{ env.IMAGE_NAME }}:${{ env.TAG }}
+
+    - name: Save image to tar (for scans)
+      run: docker save $IMAGE_NAME:$TAG -o image.tar
+
+    - name: SBOM (Syft)
+      uses: anchore/sbom-action@v0
+      with:
+        image: ${{ env.IMAGE_NAME }}:${{ env.TAG }}
+        format: cyclonedx-json
+        output-file: sbom.cdx.json
+
+    - name: Upload SBOM
+      uses: actions/upload-artifact@v4
+      with:
+        name: sbom
+        path: sbom.cdx.json
+
+    - name: Trivy FS (source deps/secrets)
+      uses: aquasecurity/trivy-action@0.24.0
+      with:
+        scan-type: fs
+        scan-ref: .
+        format: sarif
+        output: trivy-fs.sarif
+        severity: CRITICAL,HIGH
+
+    - name: Trivy Image
+      uses: aquasecurity/trivy-action@0.24.0
+      with:
+        image-ref: ${{ env.IMAGE_NAME }}:${{ env.TAG }}
+        format: sarif
+        output: trivy-image.sarif
+        severity: CRITICAL,HIGH
+
+    - name: Upload Trivy FS SARIF
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: trivy-fs.sarif
+
+    - name: Upload Trivy Image SARIF
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: trivy-image.sarif
+
+    # === render K8s manifest with the digest (main only) ===
+    - name: Render K8s manifest with digest (main only)
+      if: github.ref == 'refs/heads/main'
+      run: |
+        IMAGE_REF="${IMAGE_NAME}@${{ steps.build.outputs.digest }}"
+        echo "Resolved image: $IMAGE_REF"
+        sed "s|IMAGE_WITH_DIGEST|$IMAGE_REF|g" deployment/k8s/juice-shop.yaml > deployment/k8s/juice-shop.rendered.yaml
+        echo "Rendered deployment/k8s/juice-shop.rendered.yaml:"
+        grep 'image:' -n deployment/k8s/juice-shop.rendered.yaml
+
+    - name: Upload rendered manifest (main only)
+      if: github.ref == 'refs/heads/main'
+      uses: actions/upload-artifact@v4
+      with:
+        name: k8s-rendered
+        path: deployment/k8s/juice-shop.rendered.yaml
+
+    - name: Cosign sign (keyless)
+      if: github.ref == 'refs/heads/main'
+      uses: sigstore/cosign-installer@v3
+
+    - name: Sign image
+      if: github.ref == 'refs/heads/main'
+      run: cosign sign --yes $IMAGE_NAME:latest
 
   dast:
     runs-on: ubuntu-latest
