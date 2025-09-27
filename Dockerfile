@@ -1,16 +1,19 @@
-# --- Stage 1: fetch source ---
+# --- stage 1: fetch source
 FROM alpine/git AS src
 WORKDIR /src
 RUN git clone --depth=1 https://github.com/juice-shop/juice-shop.git .
 
-# --- Stage 2: runtime image ---
-FROM node:20-alpine
+# --- stage 2: runtime/build
+FROM node:20-alpine AS app
 WORKDIR /app
 
-# copy everything (so the check can see if a lockfile exists)
+# npm needs git for git-based deps
+RUN apk add --no-cache git
+
+# bring the code in
 COPY --from=src /src ./
 
-# If a lockfile exists, use CI; otherwise fall back to install
+# install production deps (use lockfile if present)
 RUN if [ -f package-lock.json ]; then \
       npm ci --omit=dev; \
     else \
@@ -19,4 +22,4 @@ RUN if [ -f package-lock.json ]; then \
 
 ENV NODE_ENV=production
 EXPOSE 3000
-CMD ["npm","start"]
+CMD ["npm", "start"]
