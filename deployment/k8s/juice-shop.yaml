@@ -34,7 +34,7 @@ spec:
       containers:
         - name: app
           # Fix CKV_K8S_14 & CKV_K8S_43 (no :latest; use digest)
-          image: IMAGE_WITH_DIGEST
+          image: ghcr.io/raph-rcn/juice-shop:prod@sha256:SHA256_GOES_HERE
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
