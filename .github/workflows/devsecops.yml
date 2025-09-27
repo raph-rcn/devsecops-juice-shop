@@ -143,12 +143,14 @@ jobs:
           severity: CRITICAL,HIGH
 
       - name: Upload Trivy FS SARIF
+        if: always()
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trivy-fs.sarif
           category: trivy-fs
-
+      
       - name: Upload Trivy Image SARIF
+        if: always()
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trivy-image.sarif
