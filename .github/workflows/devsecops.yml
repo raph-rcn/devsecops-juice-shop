@@ -99,6 +99,7 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME }}:${{ env.TAG }}
             ${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_NAME }}:prod
 
       - name: Build image (PRs)
         if: github.ref != 'refs/heads/main'
@@ -157,10 +158,9 @@ jobs:
           if [ -z "${{ steps.build.outputs.digest }}" ]; then
             echo "Digest missing; did the build push?"; exit 1
           fi
-          IMAGE_REF="${IMAGE_NAME}@${{ steps.build.outputs.digest }}"
-          echo "Resolved image: $IMAGE_REF"
+          IMAGE_REF="${IMAGE_NAME}:prod@${{ steps.build.outputs.digest }}"
           sed "s|IMAGE_WITH_DIGEST|$IMAGE_REF|g" deployment/k8s/juice-shop.yaml > deployment/k8s/juice-shop.rendered.yaml
-          grep 'image:' -n deployment/k8s/juice-shop.rendered.yaml
+          grep -n 'image:' deployment/k8s/juice-shop.rendered.yaml
 
       - name: Upload rendered manifest (main only)
         if: github.ref == 'refs/heads/main'
