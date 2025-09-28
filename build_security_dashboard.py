@@ -44,7 +44,7 @@ def trivy_counts(sarif):
     by = {}
     by_bucket = {}
 
-    # Map ruleId -> severity string (may be numeric or label)
+    # Map ruleId -> severity string (numeric or label)
     rule_sev = {}
     for r in runs:
         drv = r.get("tool", {}).get("driver", {})
@@ -72,7 +72,7 @@ def trivy_counts(sarif):
 
     return {"total": total, "by_sev": by, "by_bucket": by_bucket}
 
-def zap_counts(zap):
+def zap_counts(zap): # zap parsing
     if not zap:
         return {"total": 0, "by_risk": {},"alerts":[]}
     alerts = []
@@ -100,17 +100,6 @@ def sbom_counts(sbom):
     comps = sbom.get("components") or []
     return {"components": len(comps)}
 
-def mermaid_pie(zap_total, trivy_total, sbom_components):
-    lines = ['```mermaid', 'pie title Security findings (Juice Shop)']
-    if trivy_total > 0:
-        lines.append(f'  "Image vulns (Trivy)" : {trivy_total}')
-    if zap_total > 0:
-        lines.append(f'  "DAST alerts (ZAP)" : {zap_total}')
-    if sbom_components > 0:
-        lines.append(f'  "SBOM components (Syft)" : {sbom_components}')
-    lines.append('```')
-    return "\n".join(lines)
-
 def mermaid_pie_trivy_buckets(by_bucket: dict):
     order = ["Critical","High","Medium","Low","Unknown"]
     lines = ['```mermaid', 'pie title Trivy severity (image)']
@@ -121,7 +110,21 @@ def mermaid_pie_trivy_buckets(by_bucket: dict):
     lines.append('```')
     return "\n".join(lines)
 
-def table_from_dict(d, left, right):
+def mermaid_pie_zap_risk(by_risk: dict):
+    order = ["High","Medium","Low","Informational"] # Order from most severe to least + Informational
+    lines = ['```mermaid', 'pie title ZAP alerts by risk']
+    for k in order:
+        v = by_risk.get(k, 0)
+        if v > 0:
+            lines.append(f'  "{k}" : {v}')
+    # include any unexpected keys
+    for k, v in by_risk.items():
+        if k not in order and v > 0:
+            lines.append(f'  "{k}" : {v}')
+    lines.append('```')
+    return "\n".join(lines)
+
+def table_from_dict(d, left, right): # mardown helper
     if not d:
         return f"| {left} | {right} |\n|---|---|\n| (none) | 0 |\n"
     out = [f"| {left} | {right} |", "|---|---|"]
@@ -145,10 +148,9 @@ def zap_alerts_list(alerts):
     return "\n".join(lines) + "\n"
 
 def build_md(zap, trivy, sbom):
-    pie = mermaid_pie(zap["total"], trivy["total"], sbom["components"])
-    parts = [ "## 🔒 Security dashboard (Juice Shop)\n", pie, "" ]
+    parts = [ "## 🔒 Security dashboard (Juice Shop)\n" ]
 
-    # Trivy
+    # Trivy section (pie + buckets table + raw table in dropdown)
     parts += [
         "### 🐳 Container image vulnerabilities (Trivy)",
         f"**Total:** {trivy['total']}\n",
@@ -160,23 +162,26 @@ def build_md(zap, trivy, sbom):
         "\n</details>\n",
     ]
 
-    # ZAP
+    # ZAP section (pie + risk table + detailed list)
     parts += [
         "### 🌐 DAST alerts (OWASP ZAP Baseline)",
         f"**Total:** {zap['total']}\n",
+        mermaid_pie_zap_risk(zap.get("by_risk", {})),
+        "",
         table_from_dict(zap["by_risk"], "Risk", "Count"),
         "<details><summary>All ZAP alerts</summary>\n\n",
         zap_alerts_list(zap["alerts"]),
         "\n</details>\n",
     ]
 
-    # SBOM
+    # SBOM context (kept as text)
     parts += [
         "### 📦 SBOM (Syft)",
         f"**Components indexed:** {sbom['components']}\n",
         "_Note: SBOM components are not vulnerabilities, but help quantify the attack surface._\n",
     ]
 
+    # Artifacts links
     links = []
     if TRIVY_SARIF.exists():
         links.append("- Trivy SARIF: `trivy-image.sarif`")
