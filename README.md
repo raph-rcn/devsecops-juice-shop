@@ -11,14 +11,34 @@ This repo wraps the vulnerable OWASP Juice Shop to practice setting up an end-to
 ```mermaid
 pie title Security findings (Juice Shop)
   "Image vulns (Trivy)" : 1097
-  "DAST alerts (ZAP)" : 18
+  "DAST alerts (ZAP)" : 17
   "SBOM components (Syft)" : 13690
 ```
 
 ### 🐳 Container image vulnerabilities (Trivy)
 **Total:** 1097
 
-| Severity | Count |
+```mermaid
+pie title Trivy severity (image)
+  "Critical" : 10
+  "High" : 149
+  "Medium" : 508
+  "Low" : 429
+  "Unknown" : 1
+```
+
+| Severity (bucket) | Count |
+|---|---|
+| Medium | 508 |
+| Low | 429 |
+| High | 149 |
+| Critical | 10 |
+| Unknown | 1 |
+
+<details><summary>Raw severity values (from SARIF)</summary>
+
+
+| Severity (raw) | Count |
 |---|---|
 | 5.5 | 463 |
 | 2.0 | 426 |
@@ -51,12 +71,15 @@ pie title Security findings (Juice Shop)
 | 7.4 | 1 |
 | 7.7 | 1 |
 
+
+</details>
+
 ### 🌐 DAST alerts (OWASP ZAP Baseline)
-**Total:** 18
+**Total:** 17
 
 | Risk | Count |
 |---|---|
-| Informational | 10 |
+| Informational | 9 |
 | Low | 6 |
 | Medium | 2 |
 
@@ -69,18 +92,17 @@ pie title Security findings (Juice Shop)
 - **Dangerous JS Functions** — _Low_ (examples: 2) — e.g. `http://localhost:3000/main.js`
 - **Deprecated Feature Policy Header Set** — _Low_ (examples: 11) — e.g. `http://localhost:3000`
 - **Full Path Disclosure** — _Low_ (examples: 6) — e.g. `http://localhost:3000/ftp/coupons_2013.md.bak`
-- **Insufficient Site Isolation Against Spectre Vulnerability** — _Low_ (examples: 12) — e.g. `http://localhost:3000`
-- **Timestamp Disclosure - Unix** — _Low_ (examples: 16) — e.g. `http://localhost:3000`
+- **Insufficient Site Isolation Against Spectre Vulnerability** — _Low_ (examples: 10) — e.g. `http://localhost:3000`
+- **Timestamp Disclosure - Unix** — _Low_ (examples: 17) — e.g. `http://localhost:3000`
 - **Base64 Disclosure** — _Informational_ (examples: 5) — e.g. `http://localhost:3000/ftp`
 - **Information Disclosure - Suspicious Comments** — _Informational_ (examples: 2) — e.g. `http://localhost:3000/main.js`
 - **Modern Web Application** — _Informational_ (examples: 11) — e.g. `http://localhost:3000`
-- **Non-Storable Content** — _Informational_ (examples: 2) — e.g. `http://localhost:3000/ftp/coupons_2013.md.bak`
 - **Sec-Fetch-Dest Header is Missing** — _Informational_ (examples: 3) — e.g. `http://localhost:3000`
 - **Sec-Fetch-Mode Header is Missing** — _Informational_ (examples: 3) — e.g. `http://localhost:3000`
 - **Sec-Fetch-Site Header is Missing** — _Informational_ (examples: 3) — e.g. `http://localhost:3000`
 - **Sec-Fetch-User Header is Missing** — _Informational_ (examples: 3) — e.g. `http://localhost:3000`
-- **Storable and Cacheable Content** — _Informational_ (examples: 1) — e.g. `http://localhost:3000/robots.txt`
-- **Storable but Non-Cacheable Content** — _Informational_ (examples: 8) — e.g. `http://localhost:3000`
+- **Storable and Cacheable Content** — _Informational_ (examples: 2) — e.g. `http://localhost:3000/ftp`
+- **Storable but Non-Cacheable Content** — _Informational_ (examples: 9) — e.g. `http://localhost:3000`
 
 
 </details>
