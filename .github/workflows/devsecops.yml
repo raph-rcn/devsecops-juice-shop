@@ -320,7 +320,7 @@ jobs:
 
       - name: Build README security dashboard
         run: |
-          python3 scripts/build_security_dashboard.py
+          python3 build_security_dashboard.py
 
       - name: Commit README dashboard update
         run: |
