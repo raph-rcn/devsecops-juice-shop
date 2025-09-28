@@ -211,25 +211,16 @@ jobs:
             sleep 2
           done
           echo "App did not become ready" && exit 1
+          
       - name: ZAP Baseline Scan
         uses: zaproxy/action-baseline@v0.12.0
         with:
           target: "http://localhost:3000"
           rules_file_name: .zap/rules.tsv
-          cmd_options: "-a" # keep the active-ish baseline add-ons
+          cmd_options: "-a"
           fail_action: false
           allow_issue_writing: false
-          artifact_upload: false
-      
-      - name: Upload ZAP reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: zap-report
-          path: |
-            report_html.html
-            report_md.md
-            report_json.json
+          artifact_name: zap-scan-${{ github.run_id }}
 
   dast_pr:
     if: github.ref != 'refs/heads/main'
@@ -252,22 +243,13 @@ jobs:
             sleep 2
           done
           echo "App did not become ready" && exit 1
+          
       - name: ZAP Baseline Scan
         uses: zaproxy/action-baseline@v0.12.0
         with:
           target: "http://localhost:3000"
           rules_file_name: .zap/rules.tsv
-          cmd_options: "-a" # keep the active-ish baseline add-ons
+          cmd_options: "-a"
           fail_action: false
           allow_issue_writing: false
-          artifact_upload: false
-      
-      - name: Upload ZAP reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: zap-report
-          path: |
-            report_html.html
-            report_md.md
-            report_json.json
+          artifact_name: zap-scan-${{ github.run_id }}
