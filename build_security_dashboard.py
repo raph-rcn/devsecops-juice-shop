@@ -18,33 +18,59 @@ def load_json(p: pathlib.Path):
     with p.open("r", encoding="utf-8") as f:
         return json.load(f)
 
+def _bucket_label_from_sev(sev: str) -> str:
+    s = (sev or "").strip().upper()
+    if s in ("CRITICAL","HIGH","MEDIUM","LOW"):
+        return s.capitalize()
+    try:
+        v = float(s)
+    except ValueError:
+        return "Unknown"
+    if 0.1 <= v <= 3.9:
+        return "Low"
+    if 4.0 <= v <= 6.9:
+        return "Medium"
+    if 7.0 <= v <= 8.9:
+        return "High"
+    if 9.0 <= v <= 10.0:
+        return "Critical"
+    return "Unknown"
+
 def trivy_counts(sarif):
     if not sarif:
-        return {"total": 0, "by_sev": {}}
+        return {"total": 0, "by_sev": {}, "by_bucket": {}}
     runs = sarif.get("runs", [])
     total = 0
     by = {}
-    # Map ruleId -> severity if available
+    by_bucket = {}
+
+    # Map ruleId -> severity string (may be numeric or label)
     rule_sev = {}
     for r in runs:
         drv = r.get("tool", {}).get("driver", {})
         for rule in drv.get("rules", []) or []:
             rule_id = rule.get("id")
-            sev = (rule.get("properties", {}) or {}).get("security-severity") \
-                  or (rule.get("properties", {}) or {}).get("problem.severity") \
-                  or (rule.get("properties", {}) or {}).get("severity")
+            props = (rule.get("properties", {}) or {})
+            sev = props.get("security-severity") or props.get("problem.severity") or props.get("severity")
             if rule_id and sev:
-                rule_sev[rule_id] = str(sev).upper()
+                rule_sev[rule_id] = str(sev)
+
     for r in runs:
         for res in r.get("results", []) or []:
             total += 1
             sev = rule_sev.get(res.get("ruleId") or "", None)
             if not sev:
-                # fallbacks: SARIF level or default
                 sev = (res.get("level") or "warning").upper()
-            sev = {"ERROR":"CRITICAL","WARNING":"HIGH","NOTE":"MEDIUM","INFO":"LOW"}.get(sev, sev)
-            by[sev] = by.get(sev, 0) + 1
-    return {"total": total, "by_sev": by}
+                sev = {"ERROR":"CRITICAL","WARNING":"HIGH","NOTE":"MEDIUM","INFO":"LOW"}.get(sev, sev)
+            sev_str = str(sev)
+            by[sev_str] = by.get(sev_str, 0) + 1
+            bucket = _bucket_label_from_sev(sev_str)
+            by_bucket[bucket] = by_bucket.get(bucket, 0) + 1
+
+    if by_bucket.get("Unknown", 0) == 0:
+        by_bucket.pop("Unknown", None)
+
+    return {"total": total, "by_sev": by, "by_bucket": by_bucket}
 
 def zap_counts(zap):
     if not zap:
@@ -52,7 +78,6 @@ def zap_counts(zap):
     alerts = []
     total = 0
     by = {}
-    # Baseline JSON typically: { "site": [{ "alerts": [ { "alert": "...", "risk": "Low|Medium|High", "instances":[...], ... } ]}]}
     sites = zap.get("site") or zap.get("sites") or []
     for s in sites:
         for a in s.get("alerts", []) or []:
@@ -60,7 +85,6 @@ def zap_counts(zap):
             risk = risk.capitalize()
             by[risk] = by.get(risk, 0) + 1
             total += 1
-            # compact alert entry
             alerts.append({
                 "name": a.get("alert") or a.get("name") or "Alert",
                 "risk": risk,
@@ -71,23 +95,29 @@ def zap_counts(zap):
     return {"total": total, "by_risk": by, "alerts": alerts}
 
 def sbom_counts(sbom):
-    # Syft CycloneDX: components array
     if not sbom:
         return {"components": 0}
     comps = sbom.get("components") or []
     return {"components": len(comps)}
 
 def mermaid_pie(zap_total, trivy_total, sbom_components):
-    # GitHub renders Mermaid in README – simplest circular chart.
-    # We only include counts that exist (>0) so the chart looks clean.
     lines = ['```mermaid', 'pie title Security findings (Juice Shop)']
     if trivy_total > 0:
         lines.append(f'  "Image vulns (Trivy)" : {trivy_total}')
     if zap_total > 0:
         lines.append(f'  "DAST alerts (ZAP)" : {zap_total}')
-    # SBOM isn’t vulns, but useful context:
     if sbom_components > 0:
         lines.append(f'  "SBOM components (Syft)" : {sbom_components}')
+    lines.append('```')
+    return "\n".join(lines)
+
+def mermaid_pie_trivy_buckets(by_bucket: dict):
+    order = ["Critical","High","Medium","Low","Unknown"]
+    lines = ['```mermaid', 'pie title Trivy severity (image)']
+    for k in order:
+        v = by_bucket.get(k, 0)
+        if v > 0:
+            lines.append(f'  "{k}" : {v}')
     lines.append('```')
     return "\n".join(lines)
 
@@ -115,7 +145,6 @@ def zap_alerts_list(alerts):
     return "\n".join(lines) + "\n"
 
 def build_md(zap, trivy, sbom):
-    # Summary
     pie = mermaid_pie(zap["total"], trivy["total"], sbom["components"])
     parts = [ "## 🔒 Security dashboard (Juice Shop)\n", pie, "" ]
 
@@ -123,7 +152,12 @@ def build_md(zap, trivy, sbom):
     parts += [
         "### 🐳 Container image vulnerabilities (Trivy)",
         f"**Total:** {trivy['total']}\n",
-        table_from_dict(trivy["by_sev"], "Severity", "Count"),
+        mermaid_pie_trivy_buckets(trivy.get("by_bucket", {})),
+        "",
+        table_from_dict(trivy.get("by_bucket", {}), "Severity (bucket)", "Count"),
+        "<details><summary>Raw severity values (from SARIF)</summary>\n\n",
+        table_from_dict(trivy["by_sev"], "Severity (raw)", "Count"),
+        "\n</details>\n",
     ]
 
     # ZAP
@@ -143,7 +177,6 @@ def build_md(zap, trivy, sbom):
         "_Note: SBOM components are not vulnerabilities, but help quantify the attack surface._\n",
     ]
 
-    # Links to raw artifacts if present
     links = []
     if TRIVY_SARIF.exists():
         links.append("- Trivy SARIF: `trivy-image.sarif`")
@@ -171,7 +204,6 @@ def replace_in_readme(new_block: str):
     if pattern.search(text):
         text = pattern.sub(replacement, text)
     else:
-        # append if markers missing
         text = text.rstrip() + "\n\n" + replacement + "\n"
     README.write_text(text, encoding="utf-8")
 
@@ -181,15 +213,8 @@ def main():
     sbom  = sbom_counts(load_json(SBOM_JSON))
     md = build_md(zap, trivy, sbom)
 
-    # write long form for reference as well
     OUT_MD_FULL.write_text(md, encoding="utf-8")
-
-    # optional: leave a tiny SVG placeholder (Mermaid is the primary)
-    OUT_SVG.write_text(
-        "<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10'></svg>",
-        encoding="utf-8"
-    )
-
+    OUT_SVG.write_text("<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10'></svg>", encoding="utf-8")
     replace_in_readme(md)
     print("Security dashboard updated in README and SECURITY_FINDINGS.md")
 
