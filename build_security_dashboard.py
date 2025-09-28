@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-import json, re, pathlib, sys
+from pathlib import Path
+import json, re, pathlib, sys, os
 
 ROOT = Path(os.environ.get("GITHUB_WORKSPACE", Path.cwd())).resolve()
 README = ROOT / "README.md"
