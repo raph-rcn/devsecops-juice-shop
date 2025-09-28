@@ -10,6 +10,7 @@ permissions:
   security-events: write
   id-token: write
   packages: write
+  actions: write
 
 env:
   IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/juice-shop
@@ -214,6 +215,7 @@ jobs:
           
       - name: ZAP Baseline Scan
         uses: zaproxy/action-baseline@v0.12.0
+        continue-on-error: true          # don’t fail the job if artifact upload borks
         with:
           target: "http://localhost:3000"
           rules_file_name: .zap/rules.tsv
@@ -221,6 +223,16 @@ jobs:
           fail_action: false
           allow_issue_writing: false
           artifact_name: zap-scan-${{ github.run_id }}
+
+      - name: Upload ZAP reports (manual)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-scan-${{ github.run_id }}
+          path: |
+            report_html.html
+            report_md.md
+            report_json.json
 
   dast_pr:
     if: github.ref != 'refs/heads/main'
@@ -246,6 +258,7 @@ jobs:
           
       - name: ZAP Baseline Scan
         uses: zaproxy/action-baseline@v0.12.0
+        continue-on-error: true          # don’t fail the job if artifact upload borks
         with:
           target: "http://localhost:3000"
           rules_file_name: .zap/rules.tsv
@@ -253,3 +266,13 @@ jobs:
           fail_action: false
           allow_issue_writing: false
           artifact_name: zap-scan-${{ github.run_id }}
+
+      - name: Upload ZAP reports (manual)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-scan-${{ github.run_id }}
+          path: |
+            report_html.html
+            report_md.md
+            report_json.json
