@@ -1,6 +1,4 @@
-<img width="157" height="208" alt="secured_juice_box" src="https://github.com/user-attachments/assets/4384b068-9458-4288-ada4-990d5120f7ed" />
-
-# DevSecOps Juice Shop
+# <img src="https://github.com/user-attachments/assets/b75407cd-dd7f-4dbb-8e42-41d194d62997" alt="Juice Shop Secure Logo" width="147" height="198" /> DevSecOps Juice Shop
 
 This repo wraps the vulnerable OWASP Juice Shop to practice setting up an end-to-end DevSecOps lab.
 
