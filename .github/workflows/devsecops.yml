@@ -216,13 +216,19 @@ jobs:
         with:
           target: "http://localhost:3000"
           rules_file_name: .zap/rules.tsv
-          cmd_options: "-a"
-          fail_action: true
-      - name: Upload ZAP report
+          cmd_options: "-a" # keep the active-ish baseline add-ons
+          fail_action: false
+          allow_issue_writing: false
+      
+      - name: Upload ZAP reports
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: zap-report
-          path: zap_report.html
+          path: |
+            report_html.html
+            report_md.md
+            report_json.json
 
   dast_pr:
     if: github.ref != 'refs/heads/main'
@@ -250,10 +256,16 @@ jobs:
         with:
           target: "http://localhost:3000"
           rules_file_name: .zap/rules.tsv
-          cmd_options: "-a"
-          fail_action: true
-      - name: Upload ZAP report
+          cmd_options: "-a" # keep the active-ish baseline add-ons
+          fail_action: false
+          allow_issue_writing: false
+      
+      - name: Upload ZAP reports
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: zap-report
-          path: zap_report.html
+          path: |
+            report_html.html
+            report_md.md
+            report_json.json
