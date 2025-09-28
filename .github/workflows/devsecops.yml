@@ -79,6 +79,8 @@ jobs:
   build_and_scan:
     runs-on: ubuntu-latest
     needs: static
+    outputs:
+      image_digest: ${{ steps.build.outputs.digest }}
     steps:
       - uses: actions/checkout@v4
 
@@ -108,9 +110,16 @@ jobs:
           context: .
           push: false
           tags: ${{ env.IMAGE_NAME }}:${{ env.TAG }}
+          load: true  # so the image exists locally on PRs
+
+      - name: Ensure image locally
+        run: |
+          if ! docker image inspect "$IMAGE_NAME:$TAG" >/dev/null 2>&1; then
+            docker pull "$IMAGE_NAME:$TAG"
+          fi
 
       - name: Save image to tar (for scans)
-        run: docker save $IMAGE_NAME:$TAG -o image.tar
+        run: docker save "$IMAGE_NAME:$TAG" -o image.tar
 
       - name: SBOM (Syft)
         uses: anchore/sbom-action@v0
@@ -165,7 +174,7 @@ jobs:
           IMAGE_REF="${IMAGE_NAME}:prod@${{ steps.build.outputs.digest }}"
           sed "s|IMAGE_WITH_DIGEST|$IMAGE_REF|g" deployment/k8s/juice-shop.yaml > deployment/k8s/juice-shop.rendered.yaml
           grep -n 'image:' deployment/k8s/juice-shop.rendered.yaml
-
+          
       - name: Upload rendered manifest (main only)
         if: github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@v4
@@ -181,12 +190,50 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: cosign sign --yes $IMAGE_NAME:latest
 
-  dast:
+  dast_main:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     needs: build_and_scan
     services:
       juice:
-        image: ghcr.io/juice-shop/juice-shop
+        image: ${{ env.IMAGE_NAME }}@${{ needs.build_and_scan.outputs.image_digest }}
+        credentials:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+        ports:
+          - 3000:3000
+        options: >-
+          --health-cmd "wget -qO- http://localhost:3000 || exit 1"
+          --health-interval 5s --health-timeout 2s --health-retries 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Wait for app
+        run: |
+          for i in {1..60}; do
+            if curl -sf http://localhost:3000 >/dev/null; then exit 0; fi
+            sleep 2
+          done
+          echo "App did not become ready" && exit 1
+      - name: ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.12.0
+        with:
+          target: "http://localhost:3000"
+          rules_file_name: .zap/rules.tsv
+          cmd_options: "-a"
+          fail_action: true
+      - name: Upload ZAP report
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-report
+          path: zap_report.html
+
+  dast_pr:
+    if: github.ref != 'refs/heads/main'
+    runs-on: ubuntu-latest
+    needs: build_and_scan
+    services:
+      juice:
+        image: bkimminich/juice-shop:latest
         ports:
           - 3000:3000
         options: >-
