@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import json, re, pathlib, sys
 
-ROOT = pathlib.Path(__file__).resolve().parents[1]
+ROOT = Path(os.environ.get("GITHUB_WORKSPACE", Path.cwd())).resolve()
 README = ROOT / "README.md"
 
 TRIVY_SARIF = ROOT / "trivy-image.sarif"
