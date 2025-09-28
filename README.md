@@ -2,6 +2,13 @@
 
 This repo wraps the vulnerable OWASP Juice Shop to practice setting up an end-to-end DevSecOps lab.
 
+## Juice-Shop Security Dashboard
+
+<!-- security-dashboard:start -->
+
+
+<!-- security-dashboard:end -->
+
 ## GitHub Actions
 
 ### Juice-Shop Scanning
@@ -20,3 +27,4 @@ This repo wraps the vulnerable OWASP Juice Shop to practice setting up an end-to
 - IaC scanning: Checkov (Terraform), kube-linter or kube-score for K8s.
 - Signature/provenance: Cosign (keyless OIDC) + SLSA provenance (optional).
 - SARIF reporting to GitHub’s “Security > Code scanning alerts”.
+
