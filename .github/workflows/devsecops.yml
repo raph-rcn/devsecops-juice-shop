@@ -196,7 +196,7 @@ jobs:
     needs: build_and_scan
     services:
       juice:
-        image: ${{ env.IMAGE_NAME }}@${{ needs.build_and_scan.outputs.image_digest }}
+        image: ghcr.io/${{ github.repository_owner }}/juice-shop@${{ needs.build_and_scan.outputs.image_digest }}
         credentials:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
