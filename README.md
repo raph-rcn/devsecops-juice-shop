@@ -8,13 +8,6 @@ This repo wraps the vulnerable OWASP Juice Shop to practice setting up an end-to
 
 ## 🔒 Security dashboard (Juice Shop)
 
-```mermaid
-pie title Security findings (Juice Shop)
-  "Image vulns (Trivy)" : 1097
-  "DAST alerts (ZAP)" : 17
-  "SBOM components (Syft)" : 13690
-```
-
 ### 🐳 Container image vulnerabilities (Trivy)
 **Total:** 1097
 
@@ -75,11 +68,18 @@ pie title Trivy severity (image)
 </details>
 
 ### 🌐 DAST alerts (OWASP ZAP Baseline)
-**Total:** 17
+**Total:** 18
+
+```mermaid
+pie title ZAP alerts by risk
+  "Medium" : 2
+  "Low" : 6
+  "Informational" : 10
+```
 
 | Risk | Count |
 |---|---|
-| Informational | 9 |
+| Informational | 10 |
 | Low | 6 |
 | Medium | 2 |
 
@@ -93,15 +93,16 @@ pie title Trivy severity (image)
 - **Deprecated Feature Policy Header Set** — _Low_ (examples: 11) — e.g. `http://localhost:3000`
 - **Full Path Disclosure** — _Low_ (examples: 6) — e.g. `http://localhost:3000/ftp/coupons_2013.md.bak`
 - **Insufficient Site Isolation Against Spectre Vulnerability** — _Low_ (examples: 10) — e.g. `http://localhost:3000`
-- **Timestamp Disclosure - Unix** — _Low_ (examples: 17) — e.g. `http://localhost:3000`
+- **Timestamp Disclosure - Unix** — _Low_ (examples: 16) — e.g. `http://localhost:3000`
 - **Base64 Disclosure** — _Informational_ (examples: 5) — e.g. `http://localhost:3000/ftp`
 - **Information Disclosure - Suspicious Comments** — _Informational_ (examples: 2) — e.g. `http://localhost:3000/main.js`
 - **Modern Web Application** — _Informational_ (examples: 11) — e.g. `http://localhost:3000`
+- **Non-Storable Content** — _Informational_ (examples: 1) — e.g. `http://localhost:3000/ftp/encrypt.pyc`
 - **Sec-Fetch-Dest Header is Missing** — _Informational_ (examples: 3) — e.g. `http://localhost:3000`
 - **Sec-Fetch-Mode Header is Missing** — _Informational_ (examples: 3) — e.g. `http://localhost:3000`
 - **Sec-Fetch-Site Header is Missing** — _Informational_ (examples: 3) — e.g. `http://localhost:3000`
 - **Sec-Fetch-User Header is Missing** — _Informational_ (examples: 3) — e.g. `http://localhost:3000`
-- **Storable and Cacheable Content** — _Informational_ (examples: 2) — e.g. `http://localhost:3000/ftp`
+- **Storable and Cacheable Content** — _Informational_ (examples: 1) — e.g. `http://localhost:3000/robots.txt`
 - **Storable but Non-Cacheable Content** — _Informational_ (examples: 9) — e.g. `http://localhost:3000`
 
 
