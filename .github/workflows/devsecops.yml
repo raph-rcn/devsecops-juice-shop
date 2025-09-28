@@ -202,9 +202,6 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
         ports:
           - 3000:3000
-        options: >-
-          --health-cmd "wget -qO- http://localhost:3000 || exit 1"
-          --health-interval 5s --health-timeout 2s --health-retries 30
     steps:
       - uses: actions/checkout@v4
       - name: Wait for app
