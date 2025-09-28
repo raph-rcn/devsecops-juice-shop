@@ -219,6 +219,7 @@ jobs:
           cmd_options: "-a" # keep the active-ish baseline add-ons
           fail_action: false
           allow_issue_writing: false
+          artifact_upload: false
       
       - name: Upload ZAP reports
         if: always()
@@ -259,6 +260,7 @@ jobs:
           cmd_options: "-a" # keep the active-ish baseline add-ons
           fail_action: false
           allow_issue_writing: false
+          artifact_upload: false
       
       - name: Upload ZAP reports
         if: always()
