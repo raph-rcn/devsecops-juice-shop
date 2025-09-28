@@ -274,3 +274,55 @@ jobs:
             report_html.html
             report_md.md
             report_json.json
+
+  dashboard:
+    runs-on: ubuntu-latest
+    needs: [build_and_scan, dast_main, dast_pr]
+    if: always()   # build even if earlier jobs soft-failed
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Pull artifacts we need
+      - name: Download SBOM
+        uses: actions/download-artifact@v4
+        with:
+          name: sbom
+          path: .
+
+      - name: Download Trivy image SARIF
+        uses: actions/download-artifact@v4
+        with:
+          name: trivy-image-sarif
+          path: .
+
+      # ZAP reports were uploaded as "zap-scan-${{ github.run_id }}", pull if present for current run
+      - name: Download ZAP reports (if any)
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: zap-scan-${{ github.run_id }}
+          path: .
+
+      - name: Show what we have
+        run: ls -al . | sed -n '1,200p'
+
+      - name: Build README security dashboard
+        run: |
+          python3 scripts/build_security_dashboard.py
+
+      - name: Commit README dashboard update
+        run: |
+          if git diff --quiet README.md SECURITY_FINDINGS.md security-dashboard.svg; then
+            echo "No README changes."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add README.md SECURITY_FINDINGS.md security-dashboard.svg
+            git commit -m "chore(security): update README dashboard from CI"
+            git push
+          fi
