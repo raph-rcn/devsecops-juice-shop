@@ -319,8 +319,8 @@ jobs:
         run: ls -al . | sed -n '1,200p'
 
       - name: Build README security dashboard
-        run: |
-          python3 build_security_dashboard.py
+        working-directory: ${{ github.workspace }}
+        run: python3 build_security_dashboard.py
 
       - name: Commit README dashboard update
         run: |
