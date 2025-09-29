@@ -95,7 +95,7 @@ pie title ZAP alerts by risk
 - **Base64 Disclosure** — _Informational_ (examples: 5) — e.g. `http://localhost:3000/ftp`
 - **Information Disclosure - Suspicious Comments** — _Informational_ (examples: 2) — e.g. `http://localhost:3000/main.js`
 - **Modern Web Application** — _Informational_ (examples: 11) — e.g. `http://localhost:3000`
-- **Non-Storable Content** — _Informational_ (examples: 1) — e.g. `http://localhost:3000/ftp/encrypt.pyc`
+- **Non-Storable Content** — _Informational_ (examples: 1) — e.g. `http://localhost:3000/ftp/coupons_2013.md.bak`
 - **Sec-Fetch-Dest Header is Missing** — _Informational_ (examples: 3) — e.g. `http://localhost:3000`
 - **Sec-Fetch-Mode Header is Missing** — _Informational_ (examples: 3) — e.g. `http://localhost:3000`
 - **Sec-Fetch-Site Header is Missing** — _Informational_ (examples: 3) — e.g. `http://localhost:3000`
