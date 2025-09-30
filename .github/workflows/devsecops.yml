@@ -311,7 +311,7 @@ jobs:
   dashboard:
     runs-on: ubuntu-latest
     needs: [build_and_scan, dast_main, dast_pr]
-    if: always()   # build even if earlier jobs soft-failed
+    if: always()
     permissions:
       contents: write
       actions: read
@@ -320,7 +320,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      # Pull artifacts we need
       - name: Download SBOM
         uses: actions/download-artifact@v4
         with:
@@ -333,7 +332,6 @@ jobs:
           name: trivy-image-sarif
           path: .
 
-      # ZAP reports were uploaded as "zap-scan-${{ github.run_id }}", pull if present for current run
       - name: Download ZAP reports (if any)
         continue-on-error: true
         uses: actions/download-artifact@v4
@@ -341,11 +339,17 @@ jobs:
           name: zap-scan-${{ github.run_id }}
           path: .
 
+      - name: Download Grype reports
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: grype
+          path: .
+
       - name: Show what we have
         run: ls -al . | sed -n '1,200p'
 
       - name: Build README security dashboard
-        working-directory: ${{ github.workspace }}
         run: python3 build_security_dashboard.py
 
       - name: Commit README dashboard update
@@ -359,8 +363,3 @@ jobs:
             git commit -m "chore(security): update README dashboard from CI"
             git push
           fi
-      - name: Download Grype reports
-        uses: actions/download-artifact@v4
-        with:
-          name: grype
-          path: .
