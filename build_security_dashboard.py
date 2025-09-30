@@ -308,36 +308,32 @@ def grype_rows_table(rows, negligible_count):
 def build_md(zap, trivy, sbom, grype_counts, grype_rows, grype_negl):
     parts = [ "## 🔒 Security dashboard (Juice Shop)\n" ]
 
-    # ---------- Trivy: pie + bucket table ----------
-    t4 = trivy_buckets_4(trivy)  # Critical/High/Medium/Low
-    # Always show a pie; if all zeros Mermaid needs a dummy slice
-    parts += [
-        mermaid_pie_from_counts("Trivy severity (image)", t4),
-        ""
-    ]
-
+    # ---------- Trivy ----------
+    t4 = trivy_buckets_4(trivy)
     parts += [
         "### 🐳 Container image vulnerabilities (Trivy)",
         f"**Total:** {trivy['total']}\n",
+        mermaid_pie_from_counts("Trivy severity (image)", t4),
+        "",
         table_from_dict(t4, "Severity (bucket)", "Count"),
         "<details><summary>Raw severity values (from SARIF)</summary>\n\n",
         table_from_dict(trivy.get('by_sev', {}), "Severity (raw)", "Count"),
         "\n</details>\n",
     ]
 
-    # ---------- ZAP: pie + table ----------
+    # ---------- ZAP ----------
     parts += [
-        mermaid_pie_from_counts("DAST alerts (ZAP)", zap.get("by_risk", {})),
-        "",
         "### 🌐 DAST alerts (OWASP ZAP Baseline)",
         f"**Total:** {zap['total']}\n",
+        mermaid_pie_from_counts("DAST alerts (ZAP)", zap.get("by_risk", {})),
+        "",
         table_from_dict(zap.get("by_risk", {}), "Risk", "Count"),
         "<details><summary>All ZAP alerts</summary>\n\n",
         zap_alerts_list(zap.get("alerts", [])),
         "\n</details>\n",
     ]
 
-    # ---------- Grype: pie (always) + collapsible table omitting Negligible ----------
+    # ---------- Grype ----------
     gcounts = {
         "Critical":    grype_counts.get("Critical", 0),
         "High":        grype_counts.get("High", 0),
@@ -347,10 +343,10 @@ def build_md(zap, trivy, sbom, grype_counts, grype_rows, grype_negl):
         "Unknown":     grype_counts.get("Unknown", 0),
     }
     parts += [
-        mermaid_pie_from_counts("Container CVEs (Grype)", gcounts),
-        "",
         "### 🧰 Container CVEs (Grype from SBOM)",
         f"**Total (all severities):** {sum(gcounts.values())}\n",
+        mermaid_pie_from_counts("Container CVEs (Grype)", gcounts),
+        "",
         "<details><summary>Show CVE table (Negligible omitted)</summary>\n\n",
         grype_rows_table(grype_rows, grype_negl),
         "\n</details>\n",
