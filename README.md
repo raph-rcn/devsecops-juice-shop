@@ -6,30 +6,22 @@ This repo wraps the vulnerable OWASP Juice Shop to practice setting up an end-to
 
 ## 🔒 Security dashboard (Juice Shop)
 
+```mermaid
+pie title Container image vulns (Trivy)
+  "Low" : 1094
+```
+
+```mermaid
+pie title DAST alerts (ZAP)
+  "Medium" : 2
+  "Low" : 6
+  "Informational" : 10
+```
+
 ### 🐳 Container image vulnerabilities (Trivy)
 **Total:** 1094
 
-```mermaid
-pie title Trivy severity (image)
-  "Critical" : 10
-  "High" : 150
-  "Medium" : 504
-  "Low" : 429
-  "Unknown" : 1
-```
-
-| Severity (bucket) | Count |
-|---|---|
-| Medium | 504 |
-| Low | 429 |
-| High | 150 |
-| Critical | 10 |
-| Unknown | 1 |
-
-<details><summary>Raw severity values (from SARIF)</summary>
-
-
-| Severity (raw) | Count |
+| Severity | Count |
 |---|---|
 | 5.5 | 460 |
 | 2.0 | 426 |
@@ -62,18 +54,8 @@ pie title Trivy severity (image)
 | 7.4 | 1 |
 | 7.7 | 1 |
 
-
-</details>
-
 ### 🌐 DAST alerts (OWASP ZAP Baseline)
 **Total:** 18
-
-```mermaid
-pie title ZAP alerts by risk
-  "Medium" : 2
-  "Low" : 6
-  "Informational" : 10
-```
 
 | Risk | Count |
 |---|---|
@@ -88,20 +70,31 @@ pie title ZAP alerts by risk
 - **Cross-Domain Misconfiguration** — _Medium_ (examples: 11) — e.g. `http://localhost:3000`
 - **Cross-Domain JavaScript Source File Inclusion** — _Low_ (examples: 10) — e.g. `http://localhost:3000`
 - **Dangerous JS Functions** — _Low_ (examples: 2) — e.g. `http://localhost:3000/main.js`
-- **Deprecated Feature Policy Header Set** — _Low_ (examples: 11) — e.g. `http://localhost:3000`
+- **Deprecated Feature Policy Header Set** — _Low_ (examples: 12) — e.g. `http://localhost:3000`
 - **Full Path Disclosure** — _Low_ (examples: 6) — e.g. `http://localhost:3000/ftp/coupons_2013.md.bak`
 - **Insufficient Site Isolation Against Spectre Vulnerability** — _Low_ (examples: 10) — e.g. `http://localhost:3000`
 - **Timestamp Disclosure - Unix** — _Low_ (examples: 16) — e.g. `http://localhost:3000`
 - **Base64 Disclosure** — _Informational_ (examples: 5) — e.g. `http://localhost:3000/ftp`
 - **Information Disclosure - Suspicious Comments** — _Informational_ (examples: 2) — e.g. `http://localhost:3000/main.js`
 - **Modern Web Application** — _Informational_ (examples: 11) — e.g. `http://localhost:3000`
-- **Non-Storable Content** — _Informational_ (examples: 2) — e.g. `http://localhost:3000/ftp/coupons_2013.md.bak`
+- **Non-Storable Content** — _Informational_ (examples: 1) — e.g. `http://localhost:3000/ftp/eastere.gg`
 - **Sec-Fetch-Dest Header is Missing** — _Informational_ (examples: 3) — e.g. `http://localhost:3000`
 - **Sec-Fetch-Mode Header is Missing** — _Informational_ (examples: 3) — e.g. `http://localhost:3000`
-- **Sec-Fetch-Site Header is Missing** — _Informational_ (examples: 3) — e.g. `http://localhost:3000`
+- **Sec-Fetch-Site Header is Missing** — _Informational_ (examples: 2) — e.g. `http://localhost:3000`
 - **Sec-Fetch-User Header is Missing** — _Informational_ (examples: 3) — e.g. `http://localhost:3000`
 - **Storable and Cacheable Content** — _Informational_ (examples: 2) — e.g. `http://localhost:3000/ftp`
 - **Storable but Non-Cacheable Content** — _Informational_ (examples: 8) — e.g. `http://localhost:3000`
+
+
+</details>
+
+### 🧰 Container CVEs (Grype from SBOM)
+**Total (all severities):** 0
+
+<details><summary>Show CVE table (Negligible omitted)</summary>
+
+
+_No vulnerabilities reported by Grype._
 
 
 </details>
