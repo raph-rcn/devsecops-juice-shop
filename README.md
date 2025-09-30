@@ -6,6 +6,9 @@ This repo wraps the vulnerable OWASP Juice Shop to practice setting up an end-to
 
 ## 🔒 Security dashboard (Juice Shop)
 
+### 🐳 Container image vulnerabilities (Trivy)
+**Total:** 1094
+
 ```mermaid
 pie title Trivy severity (image)
   "Critical" : 10
@@ -13,9 +16,6 @@ pie title Trivy severity (image)
   "Medium" : 504
   "Low" : 430
 ```
-
-### 🐳 Container image vulnerabilities (Trivy)
-**Total:** 1094
 
 | Severity (bucket) | Count |
 |---|---|
@@ -63,15 +63,15 @@ pie title Trivy severity (image)
 
 </details>
 
+### 🌐 DAST alerts (OWASP ZAP Baseline)
+**Total:** 18
+
 ```mermaid
 pie title DAST alerts (ZAP)
   "Medium" : 2
   "Low" : 6
   "Informational" : 10
 ```
-
-### 🌐 DAST alerts (OWASP ZAP Baseline)
-**Total:** 18
 
 | Risk | Count |
 |---|---|
@@ -83,26 +83,29 @@ pie title DAST alerts (ZAP)
 
 
 - **Content Security Policy (CSP) Header Not Set** — _Medium_ (examples: 11) — e.g. `http://localhost:3000`
-- **Cross-Domain Misconfiguration** — _Medium_ (examples: 11) — e.g. `http://localhost:3000`
+- **Cross-Domain Misconfiguration** — _Medium_ (examples: 12) — e.g. `http://localhost:3000`
 - **Cross-Domain JavaScript Source File Inclusion** — _Low_ (examples: 10) — e.g. `http://localhost:3000`
 - **Dangerous JS Functions** — _Low_ (examples: 2) — e.g. `http://localhost:3000/main.js`
 - **Deprecated Feature Policy Header Set** — _Low_ (examples: 11) — e.g. `http://localhost:3000`
 - **Full Path Disclosure** — _Low_ (examples: 6) — e.g. `http://localhost:3000/ftp/coupons_2013.md.bak`
-- **Insufficient Site Isolation Against Spectre Vulnerability** — _Low_ (examples: 12) — e.g. `http://localhost:3000`
-- **Timestamp Disclosure - Unix** — _Low_ (examples: 16) — e.g. `http://localhost:3000`
+- **Insufficient Site Isolation Against Spectre Vulnerability** — _Low_ (examples: 10) — e.g. `http://localhost:3000`
+- **Timestamp Disclosure - Unix** — _Low_ (examples: 17) — e.g. `http://localhost:3000`
 - **Base64 Disclosure** — _Informational_ (examples: 5) — e.g. `http://localhost:3000/ftp`
 - **Information Disclosure - Suspicious Comments** — _Informational_ (examples: 2) — e.g. `http://localhost:3000/main.js`
 - **Modern Web Application** — _Informational_ (examples: 11) — e.g. `http://localhost:3000`
-- **Non-Storable Content** — _Informational_ (examples: 1) — e.g. `http://localhost:3000/ftp/encrypt.pyc`
+- **Non-Storable Content** — _Informational_ (examples: 2) — e.g. `http://localhost:3000/ftp/coupons_2013.md.bak`
 - **Sec-Fetch-Dest Header is Missing** — _Informational_ (examples: 3) — e.g. `http://localhost:3000`
 - **Sec-Fetch-Mode Header is Missing** — _Informational_ (examples: 3) — e.g. `http://localhost:3000`
 - **Sec-Fetch-Site Header is Missing** — _Informational_ (examples: 3) — e.g. `http://localhost:3000`
 - **Sec-Fetch-User Header is Missing** — _Informational_ (examples: 3) — e.g. `http://localhost:3000`
 - **Storable and Cacheable Content** — _Informational_ (examples: 2) — e.g. `http://localhost:3000/ftp`
-- **Storable but Non-Cacheable Content** — _Informational_ (examples: 9) — e.g. `http://localhost:3000`
+- **Storable but Non-Cacheable Content** — _Informational_ (examples: 8) — e.g. `http://localhost:3000`
 
 
 </details>
+
+### 🧰 Container CVEs (Grype from SBOM)
+**Total (all severities):** 445
 
 ```mermaid
 pie title Container CVEs (Grype)
@@ -110,9 +113,6 @@ pie title Container CVEs (Grype)
   "High" : 47
   "Medium" : 351
 ```
-
-### 🧰 Container CVEs (Grype from SBOM)
-**Total (all severities):** 445
 
 <details><summary>Show CVE table (Negligible omitted)</summary>
 
@@ -127,11 +127,11 @@ pie title Container CVEs (Grype)
 | `CVE-2025-48385-git` | `-` | `-` | Critical | `-` | `//usr/share/doc/git/copyright` |
 | `CVE-2025-48385-git-man` | `-` | `-` | Critical | `-` | `//usr/share/doc/git-man/copyright` |
 | `CVE-2025-59375-libexpat1` | `-` | `-` | Critical | `-` | `//usr/share/doc/libexpat1/copyright` |
-| `CVE-2025-6020-libpam-modules` | `-` | `-` | Critical | `-` | `//usr/share/doc/libpam-modules/copyright` |
-| `CVE-2025-6020-libpam-modules-bin` | `-` | `-` | Critical | `-` | `//usr/share/doc/libpam-modules-bin/copyright` |
-| `CVE-2025-6020-libpam-runtime` | `-` | `-` | Critical | `-` | `//usr/share/doc/libpam-runtime/copyright` |
-| `CVE-2025-6020-libpam0g` | `-` | `-` | Critical | `-` | `//usr/share/doc/libpam0g/copyright` |
-| `CVE-2025-6297-dpkg` | `-` | `-` | Critical | `-` | `//usr/share/doc/dpkg/copyright` |
+| `CVE-2025-6020-libpam-modules` | `-` | `-` | Critical | `-` | `//var/lib/dpkg/status` |
+| `CVE-2025-6020-libpam-modules-bin` | `-` | `-` | Critical | `-` | `//var/lib/dpkg/status` |
+| `CVE-2025-6020-libpam-runtime` | `-` | `-` | Critical | `-` | `//var/lib/dpkg/status` |
+| `CVE-2025-6020-libpam0g` | `-` | `-` | Critical | `-` | `//var/lib/dpkg/status` |
+| `CVE-2025-6297-dpkg` | `-` | `-` | Critical | `-` | `//var/lib/dpkg/status` |
 | `CVE-2025-7458-libsqlite3-0` | `-` | `-` | Critical | `-` | `//usr/share/doc/libsqlite3-0/copyright` |
 | `CVE-2025-8194-libpython3.11-minimal` | `-` | `-` | Critical | `-` | `//usr/share/doc/libpython3.11-minimal/copyright` |
 | `CVE-2025-8194-libpython3.11-stdlib` | `-` | `-` | Critical | `-` | `//usr/share/doc/libpython3.11-minimal/copyright` |
@@ -166,18 +166,18 @@ pie title Container CVEs (Grype)
 | `GHSA-rc47-6667-2j5j-http-cache-semantics` | `-` | `-` | Critical | `-` | `//app/node_modules/http-cache-semantics/package.json` |
 | `GHSA-whpj-8f3w-67p5-vm2` | `-` | `-` | Critical | `-` | `//app/node_modules/vm2/package.json` |
 | `GHSA-xwcq-pm8m-c4vf-crypto-js` | `-` | `-` | Critical | `-` | `//app/node_modules/crypto-js/package.json` |
-| `CVE-2023-50495-libncursesw6` | `-` | `-` | High | `-` | `//usr/share/doc/libtinfo6/copyright` |
-| `CVE-2023-50495-libtinfo6` | `-` | `-` | High | `-` | `//usr/share/doc/libtinfo6/copyright` |
-| `CVE-2023-50495-ncurses-base` | `-` | `-` | High | `-` | `//usr/share/doc/ncurses-base/copyright` |
-| `CVE-2023-50495-ncurses-bin` | `-` | `-` | High | `-` | `//usr/share/doc/ncurses-bin/copyright` |
-| `CVE-2024-10041-libpam-modules` | `-` | `-` | High | `-` | `//usr/share/doc/libpam-modules/copyright` |
-| `CVE-2024-10041-libpam-modules-bin` | `-` | `-` | High | `-` | `//usr/share/doc/libpam-modules-bin/copyright` |
-| `CVE-2024-10041-libpam-runtime` | `-` | `-` | High | `-` | `//usr/share/doc/libpam-runtime/copyright` |
-| `CVE-2024-10041-libpam0g` | `-` | `-` | High | `-` | `//usr/share/doc/libpam0g/copyright` |
-| `CVE-2024-22365-libpam-modules` | `-` | `-` | High | `-` | `//usr/share/doc/libpam-modules/copyright` |
-| `CVE-2024-22365-libpam-modules-bin` | `-` | `-` | High | `-` | `//usr/share/doc/libpam-modules-bin/copyright` |
-| `CVE-2024-22365-libpam-runtime` | `-` | `-` | High | `-` | `//usr/share/doc/libpam-runtime/copyright` |
-| `CVE-2024-22365-libpam0g` | `-` | `-` | High | `-` | `//usr/share/doc/libpam0g/copyright` |
+| `CVE-2023-50495-libncursesw6` | `-` | `-` | High | `-` | `//var/lib/dpkg/info/libncursesw6:amd64.md5sums` |
+| `CVE-2023-50495-libtinfo6` | `-` | `-` | High | `-` | `//var/lib/dpkg/status` |
+| `CVE-2023-50495-ncurses-base` | `-` | `-` | High | `-` | `//var/lib/dpkg/status` |
+| `CVE-2023-50495-ncurses-bin` | `-` | `-` | High | `-` | `//var/lib/dpkg/status` |
+| `CVE-2024-10041-libpam-modules` | `-` | `-` | High | `-` | `//var/lib/dpkg/status` |
+| `CVE-2024-10041-libpam-modules-bin` | `-` | `-` | High | `-` | `//var/lib/dpkg/status` |
+| `CVE-2024-10041-libpam-runtime` | `-` | `-` | High | `-` | `//var/lib/dpkg/status` |
+| `CVE-2024-10041-libpam0g` | `-` | `-` | High | `-` | `//var/lib/dpkg/status` |
+| `CVE-2024-22365-libpam-modules` | `-` | `-` | High | `-` | `//var/lib/dpkg/status` |
+| `CVE-2024-22365-libpam-modules-bin` | `-` | `-` | High | `-` | `//var/lib/dpkg/status` |
+| `CVE-2024-22365-libpam-runtime` | `-` | `-` | High | `-` | `//var/lib/dpkg/status` |
+| `CVE-2024-22365-libpam0g` | `-` | `-` | High | `-` | `//var/lib/dpkg/status` |
 | `CVE-2025-10148-libcurl3-gnutls` | `-` | `-` | High | `-` | `//usr/share/doc/libcurl3-gnutls/copyright` |
 | `CVE-2025-29088-libsqlite3-0` | `-` | `-` | High | `-` | `//usr/share/doc/libsqlite3-0/copyright` |
 | `CVE-2025-6069-libpython3.11-minimal` | `-` | `-` | High | `-` | `//usr/share/doc/libpython3.11-minimal/copyright` |
@@ -213,24 +213,24 @@ pie title Container CVEs (Grype)
 | `GHSA-rvg8-pwq2-xj7q-base64url` | `-` | `-` | High | `-` | `//app/node_modules/base64url/package.json` |
 | `GHSA-x5rq-j2xg-h7qm-lodash` | `-` | `-` | High | `-` | `//app/node_modules/sanitize-html/node_modules/lodash/package.json` |
 | `GHSA-xc6g-ggrc-qq4r-sanitize-html` | `-` | `-` | High | `-` | `//app/node_modules/sanitize-html/package.json` |
-| `CVE-2005-2541-tar` | `-` | `-` | Medium | `-` | `//usr/share/doc/tar/copyright` |
-| `CVE-2007-5686-login` | `-` | `-` | Medium | `-` | `//usr/share/doc/login/copyright` |
-| `CVE-2007-5686-passwd` | `-` | `-` | Medium | `-` | `//usr/share/doc/passwd/copyright` |
-| `CVE-2010-4756-libc-bin` | `-` | `-` | Medium | `-` | `//usr/share/doc/libc-bin/copyright` |
+| `CVE-2005-2541-tar` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
+| `CVE-2007-5686-login` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
+| `CVE-2007-5686-passwd` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
+| `CVE-2010-4756-libc-bin` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
 | `CVE-2010-4756-libc-dev-bin` | `-` | `-` | Medium | `-` | `//usr/share/doc/libc-dev-bin/copyright` |
-| `CVE-2010-4756-libc6` | `-` | `-` | Medium | `-` | `//usr/share/doc/libc6/copyright` |
+| `CVE-2010-4756-libc6` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
 | `CVE-2010-4756-libc6-dev` | `-` | `-` | Medium | `-` | `//usr/share/doc/libc6-dev/copyright` |
-| `CVE-2011-3374-apt` | `-` | `-` | Medium | `-` | `//usr/share/doc/apt/copyright` |
-| `CVE-2011-3374-libapt-pkg6.0` | `-` | `-` | Medium | `-` | `//usr/share/doc/libapt-pkg6.0/copyright` |
-| `CVE-2011-3389-libgnutls30` | `-` | `-` | Medium | `-` | `//usr/share/doc/libgnutls30/copyright` |
+| `CVE-2011-3374-apt` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
+| `CVE-2011-3374-libapt-pkg6.0` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
+| `CVE-2011-3389-libgnutls30` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
 | `CVE-2011-4116-libperl5.36` | `-` | `-` | Medium | `-` | `//usr/share/doc/libperl5.36/copyright` |
 | `CVE-2011-4116-perl` | `-` | `-` | Medium | `-` | `//usr/share/doc/perl/copyright` |
-| `CVE-2011-4116-perl-base` | `-` | `-` | Medium | `-` | `//usr/share/doc/perl-base/copyright` |
+| `CVE-2011-4116-perl-base` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/info/perl-base.list` |
 | `CVE-2011-4116-perl-modules-5.36` | `-` | `-` | Medium | `-` | `//usr/share/doc/perl-modules-5.36/copyright` |
-| `CVE-2013-4392-libsystemd0` | `-` | `-` | Medium | `-` | `//usr/share/doc/libsystemd0/copyright` |
-| `CVE-2013-4392-libudev1` | `-` | `-` | Medium | `-` | `//usr/share/doc/libudev1/copyright` |
+| `CVE-2013-4392-libsystemd0` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
+| `CVE-2013-4392-libudev1` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
 | `CVE-2015-3276-libldap-2.5-0` | `-` | `-` | Medium | `-` | `//usr/share/doc/libldap-2.5-0/copyright` |
-| `CVE-2016-2781-coreutils` | `-` | `-` | Medium | `-` | `//usr/share/doc/coreutils/copyright` |
+| `CVE-2016-2781-coreutils` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
 | `CVE-2017-13716-binutils` | `-` | `-` | Medium | `-` | `//usr/share/doc/binutils/copyright` |
 | `CVE-2017-13716-binutils-common` | `-` | `-` | Medium | `-` | `//usr/share/doc/binutils-common/copyright` |
 | `CVE-2017-13716-binutils-x86-64-linux-gnu` | `-` | `-` | Medium | `-` | `//usr/share/doc/binutils-common/copyright` |
@@ -240,7 +240,7 @@ pie title Container CVEs (Grype)
 | `CVE-2017-13716-libgprofng0` | `-` | `-` | Medium | `-` | `//usr/share/doc/binutils-common/copyright` |
 | `CVE-2017-14159-libldap-2.5-0` | `-` | `-` | Medium | `-` | `//usr/share/doc/libldap-2.5-0/copyright` |
 | `CVE-2017-17740-libldap-2.5-0` | `-` | `-` | Medium | `-` | `//usr/share/doc/libldap-2.5-0/copyright` |
-| `CVE-2017-18018-coreutils` | `-` | `-` | Medium | `-` | `//usr/share/doc/coreutils/copyright` |
+| `CVE-2017-18018-coreutils` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
 | `CVE-2018-1000021-git` | `-` | `-` | Medium | `-` | `//usr/share/doc/git/copyright` |
 | `CVE-2018-1000021-git-man` | `-` | `-` | Medium | `-` | `//usr/share/doc/git-man/copyright` |
 | `CVE-2018-20673-binutils` | `-` | `-` | Medium | `-` | `//usr/share/doc/binutils/copyright` |
@@ -257,15 +257,15 @@ pie title Container CVEs (Grype)
 | `CVE-2018-20712-libctf-nobfd0` | `-` | `-` | Medium | `-` | `//usr/share/doc/libctf-nobfd0/copyright` |
 | `CVE-2018-20712-libctf0` | `-` | `-` | Medium | `-` | `//usr/share/doc/binutils-common/copyright` |
 | `CVE-2018-20712-libgprofng0` | `-` | `-` | Medium | `-` | `//usr/share/doc/binutils-common/copyright` |
-| `CVE-2018-20796-libc-bin` | `-` | `-` | Medium | `-` | `//usr/share/doc/libc-bin/copyright` |
+| `CVE-2018-20796-libc-bin` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
 | `CVE-2018-20796-libc-dev-bin` | `-` | `-` | Medium | `-` | `//usr/share/doc/libc-dev-bin/copyright` |
-| `CVE-2018-20796-libc6` | `-` | `-` | Medium | `-` | `//usr/share/doc/libc6/copyright` |
+| `CVE-2018-20796-libc6` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
 | `CVE-2018-20796-libc6-dev` | `-` | `-` | Medium | `-` | `//usr/share/doc/libc6-dev/copyright` |
 | `CVE-2018-5709-libgssapi-krb5-2` | `-` | `-` | Medium | `-` | `//usr/share/doc/libgssapi-krb5-2/copyright` |
 | `CVE-2018-5709-libk5crypto3` | `-` | `-` | Medium | `-` | `//usr/share/doc/libk5crypto3/copyright` |
 | `CVE-2018-5709-libkrb5-3` | `-` | `-` | Medium | `-` | `//usr/share/doc/libkrb5-3/copyright` |
 | `CVE-2018-5709-libkrb5support0` | `-` | `-` | Medium | `-` | `//usr/share/doc/libkrb5support0/copyright` |
-| `CVE-2018-6829-libgcrypt20` | `-` | `-` | Medium | `-` | `//usr/share/doc/libgcrypt20/copyright` |
+| `CVE-2018-6829-libgcrypt20` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
 | `CVE-2018-9996-binutils` | `-` | `-` | Medium | `-` | `//usr/share/doc/binutils/copyright` |
 | `CVE-2018-9996-binutils-common` | `-` | `-` | Medium | `-` | `//usr/share/doc/binutils-common/copyright` |
 | `CVE-2018-9996-binutils-x86-64-linux-gnu` | `-` | `-` | Medium | `-` | `//usr/share/doc/binutils-common/copyright` |
@@ -273,25 +273,25 @@ pie title Container CVEs (Grype)
 | `CVE-2018-9996-libctf-nobfd0` | `-` | `-` | Medium | `-` | `//usr/share/doc/libctf-nobfd0/copyright` |
 | `CVE-2018-9996-libctf0` | `-` | `-` | Medium | `-` | `//usr/share/doc/binutils-common/copyright` |
 | `CVE-2018-9996-libgprofng0` | `-` | `-` | Medium | `-` | `//usr/share/doc/binutils-common/copyright` |
-| `CVE-2019-1010022-libc-bin` | `-` | `-` | Medium | `-` | `//usr/share/doc/libc-bin/copyright` |
+| `CVE-2019-1010022-libc-bin` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
 | `CVE-2019-1010022-libc-dev-bin` | `-` | `-` | Medium | `-` | `//usr/share/doc/libc-dev-bin/copyright` |
-| `CVE-2019-1010022-libc6` | `-` | `-` | Medium | `-` | `//usr/share/doc/libc6/copyright` |
+| `CVE-2019-1010022-libc6` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
 | `CVE-2019-1010022-libc6-dev` | `-` | `-` | Medium | `-` | `//usr/share/doc/libc6-dev/copyright` |
-| `CVE-2019-1010023-libc-bin` | `-` | `-` | Medium | `-` | `//usr/share/doc/libc-bin/copyright` |
+| `CVE-2019-1010023-libc-bin` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
 | `CVE-2019-1010023-libc-dev-bin` | `-` | `-` | Medium | `-` | `//usr/share/doc/libc-dev-bin/copyright` |
-| `CVE-2019-1010023-libc6` | `-` | `-` | Medium | `-` | `//usr/share/doc/libc6/copyright` |
+| `CVE-2019-1010023-libc6` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
 | `CVE-2019-1010023-libc6-dev` | `-` | `-` | Medium | `-` | `//usr/share/doc/libc6-dev/copyright` |
-| `CVE-2019-1010024-libc-bin` | `-` | `-` | Medium | `-` | `//usr/share/doc/libc-bin/copyright` |
+| `CVE-2019-1010024-libc-bin` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
 | `CVE-2019-1010024-libc-dev-bin` | `-` | `-` | Medium | `-` | `//usr/share/doc/libc-dev-bin/copyright` |
-| `CVE-2019-1010024-libc6` | `-` | `-` | Medium | `-` | `//usr/share/doc/libc6/copyright` |
+| `CVE-2019-1010024-libc6` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
 | `CVE-2019-1010024-libc6-dev` | `-` | `-` | Medium | `-` | `//usr/share/doc/libc6-dev/copyright` |
-| `CVE-2019-1010025-libc-bin` | `-` | `-` | Medium | `-` | `//usr/share/doc/libc-bin/copyright` |
+| `CVE-2019-1010025-libc-bin` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
 | `CVE-2019-1010025-libc-dev-bin` | `-` | `-` | Medium | `-` | `//usr/share/doc/libc-dev-bin/copyright` |
-| `CVE-2019-1010025-libc6` | `-` | `-` | Medium | `-` | `//usr/share/doc/libc6/copyright` |
+| `CVE-2019-1010025-libc6` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
 | `CVE-2019-1010025-libc6-dev` | `-` | `-` | Medium | `-` | `//usr/share/doc/libc6-dev/copyright` |
-| `CVE-2019-9192-libc-bin` | `-` | `-` | Medium | `-` | `//usr/share/doc/libc-bin/copyright` |
+| `CVE-2019-9192-libc-bin` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
 | `CVE-2019-9192-libc-dev-bin` | `-` | `-` | Medium | `-` | `//usr/share/doc/libc-dev-bin/copyright` |
-| `CVE-2019-9192-libc6` | `-` | `-` | Medium | `-` | `//usr/share/doc/libc6/copyright` |
+| `CVE-2019-9192-libc6` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
 | `CVE-2019-9192-libc6-dev` | `-` | `-` | Medium | `-` | `//usr/share/doc/libc6-dev/copyright` |
 | `CVE-2020-15719-libldap-2.5-0` | `-` | `-` | Medium | `-` | `//usr/share/doc/libldap-2.5-0/copyright` |
 | `CVE-2020-36325-libjansson4` | `-` | `-` | Medium | `-` | `//usr/share/doc/libjansson4/copyright` |
@@ -303,34 +303,34 @@ pie title Container CVEs (Grype)
 | `CVE-2021-32256-libctf0` | `-` | `-` | Medium | `-` | `//usr/share/doc/binutils-common/copyright` |
 | `CVE-2021-32256-libgprofng0` | `-` | `-` | Medium | `-` | `//usr/share/doc/binutils-common/copyright` |
 | `CVE-2021-45346-libsqlite3-0` | `-` | `-` | Medium | `-` | `//usr/share/doc/libsqlite3-0/copyright` |
-| `CVE-2022-0563-bsdutils` | `-` | `-` | Medium | `-` | `//usr/share/doc/bsdutils/copyright` |
-| `CVE-2022-0563-libblkid1` | `-` | `-` | Medium | `-` | `//usr/share/doc/libblkid1/copyright` |
-| `CVE-2022-0563-libmount1` | `-` | `-` | Medium | `-` | `//usr/share/doc/libmount1/copyright` |
-| `CVE-2022-0563-libsmartcols1` | `-` | `-` | Medium | `-` | `//usr/share/doc/libsmartcols1/copyright` |
-| `CVE-2022-0563-libuuid1` | `-` | `-` | Medium | `-` | `//usr/share/doc/libuuid1/copyright` |
-| `CVE-2022-0563-mount` | `-` | `-` | Medium | `-` | `//usr/share/doc/mount/copyright` |
-| `CVE-2022-0563-util-linux` | `-` | `-` | Medium | `-` | `//usr/share/doc/util-linux/copyright` |
-| `CVE-2022-0563-util-linux-extra` | `-` | `-` | Medium | `-` | `//usr/share/doc/util-linux-extra/copyright` |
+| `CVE-2022-0563-bsdutils` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
+| `CVE-2022-0563-libblkid1` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
+| `CVE-2022-0563-libmount1` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
+| `CVE-2022-0563-libsmartcols1` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
+| `CVE-2022-0563-libuuid1` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
+| `CVE-2022-0563-mount` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
+| `CVE-2022-0563-util-linux` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
+| `CVE-2022-0563-util-linux-extra` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
 | `CVE-2022-24975-git` | `-` | `-` | Medium | `-` | `//usr/share/doc/git/copyright` |
 | `CVE-2022-24975-git-man` | `-` | `-` | Medium | `-` | `//usr/share/doc/git-man/copyright` |
-| `CVE-2022-27943-cpp-12` | `-` | `-` | Medium | `-` | `//usr/share/doc/gcc-12-base/copyright` |
-| `CVE-2022-27943-g++-12` | `-` | `-` | Medium | `-` | `//usr/share/doc/gcc-12-base/copyright` |
-| `CVE-2022-27943-gcc-12` | `-` | `-` | Medium | `-` | `//usr/share/doc/gcc-12-base/copyright` |
-| `CVE-2022-27943-gcc-12-base` | `-` | `-` | Medium | `-` | `//usr/share/doc/gcc-12-base/copyright` |
-| `CVE-2022-27943-libasan8` | `-` | `-` | Medium | `-` | `//usr/share/doc/gcc-12-base/copyright` |
-| `CVE-2022-27943-libatomic1` | `-` | `-` | Medium | `-` | `//usr/share/doc/gcc-12-base/copyright` |
-| `CVE-2022-27943-libcc1-0` | `-` | `-` | Medium | `-` | `//usr/share/doc/gcc-12-base/copyright` |
-| `CVE-2022-27943-libgcc-12-dev` | `-` | `-` | Medium | `-` | `//usr/share/doc/gcc-12-base/copyright` |
-| `CVE-2022-27943-libgcc-s1` | `-` | `-` | Medium | `-` | `//usr/share/doc/gcc-12-base/copyright` |
-| `CVE-2022-27943-libgomp1` | `-` | `-` | Medium | `-` | `//usr/share/doc/gcc-12-base/copyright` |
-| `CVE-2022-27943-libitm1` | `-` | `-` | Medium | `-` | `//usr/share/doc/gcc-12-base/copyright` |
-| `CVE-2022-27943-liblsan0` | `-` | `-` | Medium | `-` | `//usr/share/doc/gcc-12-base/copyright` |
-| `CVE-2022-27943-libquadmath0` | `-` | `-` | Medium | `-` | `//usr/share/doc/gcc-12-base/copyright` |
-| `CVE-2022-27943-libstdc++-12-dev` | `-` | `-` | Medium | `-` | `//usr/share/doc/gcc-12-base/copyright` |
-| `CVE-2022-27943-libstdc++6` | `-` | `-` | Medium | `-` | `//usr/share/doc/gcc-12-base/copyright` |
-| `CVE-2022-27943-libtsan2` | `-` | `-` | Medium | `-` | `//usr/share/doc/gcc-12-base/copyright` |
-| `CVE-2022-27943-libubsan1` | `-` | `-` | Medium | `-` | `//usr/share/doc/gcc-12-base/copyright` |
-| `CVE-2022-3219-gpgv` | `-` | `-` | Medium | `-` | `//usr/share/doc/gpgv/copyright` |
+| `CVE-2022-27943-cpp-12` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/info/cpp-12.list` |
+| `CVE-2022-27943-g++-12` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/info/g++-12.list` |
+| `CVE-2022-27943-gcc-12` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/info/gcc-12.list` |
+| `CVE-2022-27943-gcc-12-base` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
+| `CVE-2022-27943-libasan8` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/info/libasan8:amd64.md5sums` |
+| `CVE-2022-27943-libatomic1` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/info/libatomic1:amd64.md5sums` |
+| `CVE-2022-27943-libcc1-0` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/info/libcc1-0:amd64.md5sums` |
+| `CVE-2022-27943-libgcc-12-dev` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/info/libgcc-12-dev:amd64.md5sums` |
+| `CVE-2022-27943-libgcc-s1` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
+| `CVE-2022-27943-libgomp1` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/info/libgomp1:amd64.md5sums` |
+| `CVE-2022-27943-libitm1` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/info/libitm1:amd64.md5sums` |
+| `CVE-2022-27943-liblsan0` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/info/liblsan0:amd64.md5sums` |
+| `CVE-2022-27943-libquadmath0` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/info/libquadmath0:amd64.md5sums` |
+| `CVE-2022-27943-libstdc++-12-dev` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/info/libstdc++-12-dev:amd64.md5sums` |
+| `CVE-2022-27943-libstdc++6` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
+| `CVE-2022-27943-libtsan2` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/info/libtsan2:amd64.md5sums` |
+| `CVE-2022-27943-libubsan1` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/info/libubsan1:amd64.md5sums` |
+| `CVE-2022-3219-gpgv` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
 | `CVE-2023-1972-binutils` | `-` | `-` | Medium | `-` | `//usr/share/doc/binutils/copyright` |
 | `CVE-2023-1972-binutils-common` | `-` | `-` | Medium | `-` | `//usr/share/doc/binutils-common/copyright` |
 | `CVE-2023-1972-binutils-x86-64-linux-gnu` | `-` | `-` | Medium | `-` | `//usr/share/doc/binutils-common/copyright` |
@@ -338,18 +338,18 @@ pie title Container CVEs (Grype)
 | `CVE-2023-1972-libctf-nobfd0` | `-` | `-` | Medium | `-` | `//usr/share/doc/libctf-nobfd0/copyright` |
 | `CVE-2023-1972-libctf0` | `-` | `-` | Medium | `-` | `//usr/share/doc/binutils-common/copyright` |
 | `CVE-2023-1972-libgprofng0` | `-` | `-` | Medium | `-` | `//usr/share/doc/binutils-common/copyright` |
-| `CVE-2023-31437-libsystemd0` | `-` | `-` | Medium | `-` | `//usr/share/doc/libsystemd0/copyright` |
-| `CVE-2023-31437-libudev1` | `-` | `-` | Medium | `-` | `//usr/share/doc/libudev1/copyright` |
-| `CVE-2023-31438-libsystemd0` | `-` | `-` | Medium | `-` | `//usr/share/doc/libsystemd0/copyright` |
-| `CVE-2023-31438-libudev1` | `-` | `-` | Medium | `-` | `//usr/share/doc/libudev1/copyright` |
-| `CVE-2023-31439-libsystemd0` | `-` | `-` | Medium | `-` | `//usr/share/doc/libsystemd0/copyright` |
-| `CVE-2023-31439-libudev1` | `-` | `-` | Medium | `-` | `//usr/share/doc/libudev1/copyright` |
+| `CVE-2023-31437-libsystemd0` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
+| `CVE-2023-31437-libudev1` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
+| `CVE-2023-31438-libsystemd0` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
+| `CVE-2023-31438-libudev1` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
+| `CVE-2023-31439-libsystemd0` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
+| `CVE-2023-31439-libudev1` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
 | `CVE-2023-31486-libperl5.36` | `-` | `-` | Medium | `-` | `//usr/share/doc/libperl5.36/copyright` |
 | `CVE-2023-31486-perl` | `-` | `-` | Medium | `-` | `//usr/share/doc/perl/copyright` |
-| `CVE-2023-31486-perl-base` | `-` | `-` | Medium | `-` | `//usr/share/doc/perl-base/copyright` |
+| `CVE-2023-31486-perl-base` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/info/perl-base.list` |
 | `CVE-2023-31486-perl-modules-5.36` | `-` | `-` | Medium | `-` | `//usr/share/doc/perl-modules-5.36/copyright` |
 | `CVE-2023-52426-libexpat1` | `-` | `-` | Medium | `-` | `//usr/share/doc/libexpat1/copyright` |
-| `CVE-2024-2236-libgcrypt20` | `-` | `-` | Medium | `-` | `//usr/share/doc/libgcrypt20/copyright` |
+| `CVE-2024-2236-libgcrypt20` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
 | `CVE-2024-2379-libcurl3-gnutls` | `-` | `-` | Medium | `-` | `//usr/share/doc/libcurl3-gnutls/copyright` |
 | `CVE-2024-26458-libgssapi-krb5-2` | `-` | `-` | Medium | `-` | `//usr/share/doc/libgssapi-krb5-2/copyright` |
 | `CVE-2024-26458-libk5crypto3` | `-` | `-` | Medium | `-` | `//usr/share/doc/libk5crypto3/copyright` |
@@ -369,8 +369,8 @@ pie title Container CVEs (Grype)
 | `CVE-2024-53589-libctf-nobfd0` | `-` | `-` | Medium | `-` | `//usr/share/doc/libctf-nobfd0/copyright` |
 | `CVE-2024-53589-libctf0` | `-` | `-` | Medium | `-` | `//usr/share/doc/binutils-common/copyright` |
 | `CVE-2024-53589-libgprofng0` | `-` | `-` | Medium | `-` | `//usr/share/doc/binutils-common/copyright` |
-| `CVE-2024-56433-login` | `-` | `-` | Medium | `-` | `//usr/share/doc/login/copyright` |
-| `CVE-2024-56433-passwd` | `-` | `-` | Medium | `-` | `//usr/share/doc/passwd/copyright` |
+| `CVE-2024-56433-login` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
+| `CVE-2024-56433-passwd` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
 | `CVE-2024-57360-binutils` | `-` | `-` | Medium | `-` | `//usr/share/doc/binutils/copyright` |
 | `CVE-2024-57360-binutils-common` | `-` | `-` | Medium | `-` | `//usr/share/doc/binutils-common/copyright` |
 | `CVE-2024-57360-binutils-x86-64-linux-gnu` | `-` | `-` | Medium | `-` | `//usr/share/doc/binutils-common/copyright` |
@@ -502,7 +502,7 @@ pie title Container CVEs (Grype)
 | `CVE-2025-27587-openssl` | `-` | `-` | Medium | `-` | `//usr/share/doc/openssl/copyright` |
 | `CVE-2025-27613-git` | `-` | `-` | Medium | `-` | `//usr/share/doc/git/copyright` |
 | `CVE-2025-27613-git-man` | `-` | `-` | Medium | `-` | `//usr/share/doc/git-man/copyright` |
-| `CVE-2025-30258-gpgv` | `-` | `-` | Medium | `-` | `//usr/share/doc/gpgv/copyright` |
+| `CVE-2025-30258-gpgv` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
 | `CVE-2025-3198-binutils` | `-` | `-` | Medium | `-` | `//usr/share/doc/binutils/copyright` |
 | `CVE-2025-3198-binutils-common` | `-` | `-` | Medium | `-` | `//usr/share/doc/binutils-common/copyright` |
 | `CVE-2025-3198-binutils-x86-64-linux-gnu` | `-` | `-` | Medium | `-` | `//usr/share/doc/binutils-common/copyright` |
@@ -528,11 +528,11 @@ pie title Container CVEs (Grype)
 | `CVE-2025-5245-libctf-nobfd0` | `-` | `-` | Medium | `-` | `//usr/share/doc/libctf-nobfd0/copyright` |
 | `CVE-2025-5245-libctf0` | `-` | `-` | Medium | `-` | `//usr/share/doc/binutils-common/copyright` |
 | `CVE-2025-5245-libgprofng0` | `-` | `-` | Medium | `-` | `//usr/share/doc/binutils-common/copyright` |
-| `CVE-2025-5278-coreutils` | `-` | `-` | Medium | `-` | `//usr/share/doc/coreutils/copyright` |
-| `CVE-2025-6141-libncursesw6` | `-` | `-` | Medium | `-` | `//usr/share/doc/libtinfo6/copyright` |
-| `CVE-2025-6141-libtinfo6` | `-` | `-` | Medium | `-` | `//usr/share/doc/libtinfo6/copyright` |
-| `CVE-2025-6141-ncurses-base` | `-` | `-` | Medium | `-` | `//usr/share/doc/ncurses-base/copyright` |
-| `CVE-2025-6141-ncurses-bin` | `-` | `-` | Medium | `-` | `//usr/share/doc/ncurses-bin/copyright` |
+| `CVE-2025-5278-coreutils` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
+| `CVE-2025-6141-libncursesw6` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/info/libncursesw6:amd64.md5sums` |
+| `CVE-2025-6141-libtinfo6` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
+| `CVE-2025-6141-ncurses-base` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
+| `CVE-2025-6141-ncurses-bin` | `-` | `-` | Medium | `-` | `//var/lib/dpkg/status` |
 | `CVE-2025-7545-binutils` | `-` | `-` | Medium | `-` | `//usr/share/doc/binutils/copyright` |
 | `CVE-2025-7545-binutils-common` | `-` | `-` | Medium | `-` | `//usr/share/doc/binutils-common/copyright` |
 | `CVE-2025-7545-binutils-x86-64-linux-gnu` | `-` | `-` | Medium | `-` | `//usr/share/doc/binutils-common/copyright` |
