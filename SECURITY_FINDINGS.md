@@ -1,22 +1,22 @@
 ## 🔒 Security dashboard (Juice Shop)
 
 ### 🐳 Container image vulnerabilities (Trivy)
-**Total:** 1097
+**Total:** 1094
 
 ```mermaid
 pie title Trivy severity (image)
   "Critical" : 10
-  "High" : 149
-  "Medium" : 508
+  "High" : 150
+  "Medium" : 504
   "Low" : 429
   "Unknown" : 1
 ```
 
 | Severity (bucket) | Count |
 |---|---|
-| Medium | 508 |
+| Medium | 504 |
 | Low | 429 |
-| High | 149 |
+| High | 150 |
 | Critical | 10 |
 | Unknown | 1 |
 
@@ -25,14 +25,14 @@ pie title Trivy severity (image)
 
 | Severity (raw) | Count |
 |---|---|
-| 5.5 | 463 |
+| 5.5 | 460 |
 | 2.0 | 426 |
 | 8.0 | 81 |
-| 7.8 | 42 |
+| 7.8 | 43 |
 | 4.7 | 13 |
 | 6.5 | 9 |
 | 7.5 | 9 |
-| 5.3 | 7 |
+| 5.3 | 6 |
 | 7.1 | 5 |
 | 9.8 | 4 |
 | 4.1 | 3 |
@@ -89,19 +89,19 @@ pie title ZAP alerts by risk
 - **Base64 Disclosure** — _Informational_ (examples: 5) — e.g. `http://localhost:3000/ftp`
 - **Information Disclosure - Suspicious Comments** — _Informational_ (examples: 2) — e.g. `http://localhost:3000/main.js`
 - **Modern Web Application** — _Informational_ (examples: 11) — e.g. `http://localhost:3000`
-- **Non-Storable Content** — _Informational_ (examples: 1) — e.g. `http://localhost:3000/ftp/coupons_2013.md.bak`
+- **Non-Storable Content** — _Informational_ (examples: 2) — e.g. `http://localhost:3000/ftp/coupons_2013.md.bak`
 - **Sec-Fetch-Dest Header is Missing** — _Informational_ (examples: 3) — e.g. `http://localhost:3000`
 - **Sec-Fetch-Mode Header is Missing** — _Informational_ (examples: 3) — e.g. `http://localhost:3000`
 - **Sec-Fetch-Site Header is Missing** — _Informational_ (examples: 3) — e.g. `http://localhost:3000`
 - **Sec-Fetch-User Header is Missing** — _Informational_ (examples: 3) — e.g. `http://localhost:3000`
-- **Storable and Cacheable Content** — _Informational_ (examples: 1) — e.g. `http://localhost:3000/robots.txt`
-- **Storable but Non-Cacheable Content** — _Informational_ (examples: 9) — e.g. `http://localhost:3000`
+- **Storable and Cacheable Content** — _Informational_ (examples: 2) — e.g. `http://localhost:3000/ftp`
+- **Storable but Non-Cacheable Content** — _Informational_ (examples: 8) — e.g. `http://localhost:3000`
 
 
 </details>
 
 ### 📦 SBOM (Syft)
-**Components indexed:** 13690
+**Components indexed:** 13776
 
 _Note: SBOM components are not vulnerabilities, but help quantify the attack surface._
 
