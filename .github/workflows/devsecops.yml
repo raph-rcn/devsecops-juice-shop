@@ -359,3 +359,8 @@ jobs:
             git commit -m "chore(security): update README dashboard from CI"
             git push
           fi
+      - name: Download Grype reports
+        uses: actions/download-artifact@v4
+        with:
+          name: grype
+          path: .
