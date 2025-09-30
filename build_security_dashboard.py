@@ -104,15 +104,20 @@ def trivy_buckets_4(trivy):
 
 def mermaid_pie_from_counts(title:str, counts:dict):
     lines = ['```mermaid', f'pie title {title}']
-    # stable order for readability
     order = ["Critical","High","Medium","Low","Negligible","Unknown","Info","Informational"]
-    for k in order:
-        if counts.get(k, 0):
-            lines.append(f'  "{k}" : {counts[k]}')
-    # any other keys
-    for k, v in counts.items():
-        if k not in order and v:
-            lines.append(f'  "{k}" : {v}')
+    total = sum(int(v) for v in counts.values() if v)
+
+    if total == 0:
+        # Mermaid pie can't render with all-zero slices — add a placeholder slice
+        lines.append('  "No findings" : 1')
+    else:
+        for k in order:
+            v = counts.get(k, 0)
+            if v:
+                lines.append(f'  "{k}" : {v}')
+        for k, v in counts.items():
+            if k not in order and v:
+                lines.append(f'  "{k}" : {v}')
     lines.append('```')
     return "\n".join(lines)
 
@@ -303,72 +308,62 @@ def grype_rows_table(rows, negligible_count):
 def build_md(zap, trivy, sbom, grype_counts, grype_rows, grype_negl):
     parts = [ "## 🔒 Security dashboard (Juice Shop)\n" ]
 
-    # Trivy severity pie (Critical/High/Medium/Low)
-    t4 = trivy_buckets_4(trivy)
-    if sum(t4.values()):
-        parts += [ # expand to show the raw numeric severities
-            "<details><summary>Raw severity values (from SARIF)</summary>\n\n",
-            table_from_dict(trivy["by_sev"], "Severity (raw)", "Count"),
-            "\n</details>\n",
-        ]
+    # ---------- Trivy: pie + bucket table ----------
+    t4 = trivy_buckets_4(trivy)  # Critical/High/Medium/Low
+    # Always show a pie; if all zeros Mermaid needs a dummy slice
+    parts += [
+        mermaid_pie_from_counts("Trivy severity (image)", t4),
+        ""
+    ]
 
-    # ZAP alerts pie
-    if sum((zap.get("by_risk") or {}).values()):
-        parts += [
-            mermaid_pie_from_counts("DAST alerts (ZAP)", zap["by_risk"]),
-            ""
-        ]
-
-    # Grype CVE pie (Critical/High/Medium/Low/Negligible/Unknown)
-    if sum(grype_counts.values()):
-        parts += [ # Render even if counts are zero to keep the section visible.
-            mermaid_pie_from_counts("Container CVEs (Grype)", {
-                "Critical": grype_counts.get("Critical", 0),
-                "High": grype_counts.get("High", 0),
-                "Medium": grype_counts.get("Medium", 0),
-                "Low": grype_counts.get("Low", 0),
-                "Negligible": grype_counts.get("Negligible", 0),
-                "Unknown": grype_counts.get("Unknown", 0),
-            }),
-            ""
-        ]
-
-    # --- Sections ---
-
-    # Trivy (keep the detailed table you had)
     parts += [
         "### 🐳 Container image vulnerabilities (Trivy)",
         f"**Total:** {trivy['total']}\n",
-        table_from_dict(trivy["by_sev"], "Severity", "Count"),
-    ]
-
-    # ZAP section (unchanged)
-    parts += [
-        "### 🌐 DAST alerts (OWASP ZAP Baseline)",
-        f"**Total:** {zap['total']}\n",
-        table_from_dict(zap["by_risk"], "Risk", "Count"),
-        "<details><summary>All ZAP alerts</summary>\n\n",
-        zap_alerts_list(zap["alerts"]),
+        table_from_dict(t4, "Severity (bucket)", "Count"),
+        "<details><summary>Raw severity values (from SARIF)</summary>\n\n",
+        table_from_dict(trivy.get('by_sev', {}), "Severity (raw)", "Count"),
         "\n</details>\n",
     ]
 
-    # Grype details (collapsible, with negligible summarized only)
+    # ---------- ZAP: pie + table ----------
     parts += [
+        mermaid_pie_from_counts("DAST alerts (ZAP)", zap.get("by_risk", {})),
+        "",
+        "### 🌐 DAST alerts (OWASP ZAP Baseline)",
+        f"**Total:** {zap['total']}\n",
+        table_from_dict(zap.get("by_risk", {}), "Risk", "Count"),
+        "<details><summary>All ZAP alerts</summary>\n\n",
+        zap_alerts_list(zap.get("alerts", [])),
+        "\n</details>\n",
+    ]
+
+    # ---------- Grype: pie (always) + collapsible table omitting Negligible ----------
+    gcounts = {
+        "Critical":    grype_counts.get("Critical", 0),
+        "High":        grype_counts.get("High", 0),
+        "Medium":      grype_counts.get("Medium", 0),
+        "Low":         grype_counts.get("Low", 0),
+        "Negligible":  grype_counts.get("Negligible", 0),
+        "Unknown":     grype_counts.get("Unknown", 0),
+    }
+    parts += [
+        mermaid_pie_from_counts("Container CVEs (Grype)", gcounts),
+        "",
         "### 🧰 Container CVEs (Grype from SBOM)",
-        f"**Total (all severities):** {sum(grype_counts.values())}\n",
+        f"**Total (all severities):** {sum(gcounts.values())}\n",
         "<details><summary>Show CVE table (Negligible omitted)</summary>\n\n",
         grype_rows_table(grype_rows, grype_negl),
         "\n</details>\n",
     ]
 
-    # SBOM
+    # ---------- SBOM ----------
     parts += [
         "### 📦 SBOM (Syft)",
         f"**Components indexed:** {sbom['components']}\n",
         "_Note: SBOM components are not vulnerabilities, but help quantify the attack surface._\n",
     ]
 
-    # Artifacts
+    # ---------- Artifacts ----------
     links = []
     if TRIVY_SARIF.exists():
         links.append("- Trivy SARIF: `trivy-image.sarif`")
