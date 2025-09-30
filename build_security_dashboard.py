@@ -27,40 +27,79 @@ def trivy_counts(sarif):
     total = 0
     by = Counter()
     rule_sev = {}
+
+    def norm_rule_sev(val):
+        # try numeric first
+        try:
+            return float(val)
+        except Exception:
+            pass
+        # map SARIF levels to buckets later
+        s = str(val).strip()
+        return s
+
     for r in runs:
         drv = r.get("tool", {}).get("driver", {})
         for rule in drv.get("rules", []) or []:
             rule_id = rule.get("id")
-            sev = (rule.get("properties", {}) or {}).get("security-severity") \
-                  or (rule.get("properties", {}) or {}).get("problem.severity") \
-                  or (rule.get("properties", {}) or {}).get("severity")
+            props = (rule.get("properties", {}) or {})
+            sev = (
+                props.get("security-severity")
+                or props.get("problem.severity")
+                or props.get("severity")
+            )
             if rule_id and sev is not None:
-                rule_sev[rule_id] = str(sev).upper()
+                rule_sev[rule_id] = norm_rule_sev(sev)
+
     for r in runs:
         for res in r.get("results", []) or []:
             total += 1
-            sev = rule_sev.get(res.get("ruleId") or "", None)
-            if not sev:
-                sev = (res.get("level") or "warning").upper()
-            sev = {"ERROR":"CRITICAL","WARNING":"HIGH","NOTE":"MEDIUM","INFO":"LOW"}.get(sev, sev)
-            by[sev] += 1
+            sev = rule_sev.get(res.get("ruleId") or "")
+            if sev is None:
+                sev = res.get("level") or "warning"
+
+            # normalize result-level severity:
+            # - if numeric (CVSS-ish): keep number
+            # - if text: map SARIF level -> bucket later
+            if isinstance(sev, str):
+                try:
+                    sev = float(sev)
+                except Exception:
+                    sev = sev.strip().lower()
+
+            by[str(sev)] += 1  # keep raw “label” for the raw table
     return {"total": total, "by_sev": dict(by)}
 
-def trivy_bucket(sev_label:str):
-    # Map many Trivy labels into 4 buckets by typical semantics
-    s = sev_label.upper()
-    if s.startswith("CRIT") or s in {"CRITICAL"}:
-        return "Critical"
-    if s.startswith("HIGH"):
-        return "High"
-    if s.startswith("MED") or s in {"MODERATE"}:
-        return "Medium"
+def trivy_bucket(label_or_number):
+    """
+    Map raw Trivy severities (numbers like 5.5, 7.8, etc. or text) into 4 buckets:
+    Critical (≥9.0), High (≥7.0), Medium (≥4.0), Low (<4.0).
+    """
+    # numeric?
+    try:
+        x = float(label_or_number)
+        if x >= 9.0: return "Critical"
+        if x >= 7.0: return "High"
+        if x >= 4.0: return "Medium"
+        return "Low"
+    except Exception:
+        pass
+
+    s = str(label_or_number).strip().lower()
+    if s.startswith("crit"):   return "Critical"
+    if s.startswith("high"):   return "High"
+    if s.startswith("med"):    return "Medium"
+    if s in {"moderate"}:      return "Medium"
+    if s in {"error"}:         return "Critical"   # SARIF level
+    if s in {"warning"}:       return "High"       # SARIF level
+    if s in {"note"}:          return "Medium"     # SARIF level
+    if s in {"info","information","informational"}: return "Low"
     return "Low"
 
 def trivy_buckets_4(trivy):
     buckets = Counter()
-    for sev, n in (trivy.get("by_sev") or {}).items():
-        buckets[trivy_bucket(sev)] += n
+    for raw_label, n in (trivy.get("by_sev") or {}).items():
+        buckets[trivy_bucket(raw_label)] += n
     return dict(buckets)
 
 def mermaid_pie_from_counts(title:str, counts:dict):
@@ -267,9 +306,10 @@ def build_md(zap, trivy, sbom, grype_counts, grype_rows, grype_negl):
     # Trivy severity pie (Critical/High/Medium/Low)
     t4 = trivy_buckets_4(trivy)
     if sum(t4.values()):
-        parts += [
-            mermaid_pie_from_counts("Container image vulns (Trivy)", t4),
-            ""
+        parts += [ # expand to show the raw numeric severities
+            "<details><summary>Raw severity values (from SARIF)</summary>\n\n",
+            table_from_dict(trivy["by_sev"], "Severity (raw)", "Count"),
+            "\n</details>\n",
         ]
 
     # ZAP alerts pie
@@ -281,8 +321,15 @@ def build_md(zap, trivy, sbom, grype_counts, grype_rows, grype_negl):
 
     # Grype CVE pie (Critical/High/Medium/Low/Negligible/Unknown)
     if sum(grype_counts.values()):
-        parts += [
-            mermaid_pie_from_counts("Container CVEs (Grype)", grype_counts),
+        parts += [ # Render even if counts are zero to keep the section visible.
+            mermaid_pie_from_counts("Container CVEs (Grype)", {
+                "Critical": grype_counts.get("Critical", 0),
+                "High": grype_counts.get("High", 0),
+                "Medium": grype_counts.get("Medium", 0),
+                "Low": grype_counts.get("Low", 0),
+                "Negligible": grype_counts.get("Negligible", 0),
+                "Unknown": grype_counts.get("Unknown", 0),
+            }),
             ""
         ]
 
