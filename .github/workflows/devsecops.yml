@@ -198,6 +198,32 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: cosign sign --yes $IMAGE_NAME:latest
 
+      - name: Grype (scan SBOM)
+        run: |
+          # SARIF for Code Scanning
+          docker run --rm -v "$PWD:/work" -w /work anchore/grype:latest \
+            sbom:sbom.cdx.json -o sarif -q > grype.sarif || true
+
+          # Human-readable summary table
+          docker run --rm -v "$PWD:/work" -w /work anchore/grype:latest \
+            sbom:sbom.cdx.json -o table -q > grype.txt || true
+
+      - name: Upload Grype SARIF to code scanning
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: grype.sarif
+          category: grype-sbom
+
+      - name: Upload Grype reports (artifact)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: grype
+          path: |
+            grype.sarif
+            grype.txt
+
   dast_main:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
